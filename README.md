@@ -3,11 +3,11 @@ game
 
 This project implements the game of Breakout.
 
-Name: 
+Name: Hunter Gregory
 
 ### Timeline
 
-Start Date: 
+Start Date: 1/13/18
 
 Finish Date: 
 

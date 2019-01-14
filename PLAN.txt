@@ -1,0 +1,110 @@
+Hunter Gregory
+Plan for Game Project
+
+I enjoyed the Circus variant of Breakout. I loved the idea of launching flailing acrobats into the air with a
+seesaw-like catapult as opposed to using a paddle to rebound a ball. I also thought it was cool that you have
+to strategically land a person to launch the other person high enough; otherwise, gravity prevents them from even
+reaching the "blocks". I enjoyed the low-level animation too.
+
+
+
+My Project
+Title: Block Breaker
+
+Inspiration: The original Breakout and one of its descendants - Brick Breaker (I loved to play this
+on my Dad's Blackberry).
+
+General Idea: Paddles on all 4 sides of the screen. The up and down arrow keys will control the left and
+right paddles; the left and right arrow keys the top and bottom paddles.
+
+
+Powerups (there will be multiple random powerups a level, placed in random blocks, and they'll fall towards
+whichever side of a block was hit e.g. could fall up towards the op paddle):
+* laser guns on paddles for 3 seconds
+* ball splits into 4 balls
+* bigger paddles for 10 seconds
+* supercharge - next time the ball lands on your paddle, the ball stops, then you can aim and fire a ball
+that will go through 5 hits worth of blocks OR break a metal/trampoline/sand block
+
+Cheats: 
+* fast forward - speeds up the ball's velocity, paddles unaffected
+* slow mo - slow's the ball down, paddles unaffected
+* HUGE paddles - paddles take up the whole wall
+* revive - one extra life
+* next level
+* previous level
+
+Status:
+* current level
+* current score
+* lives remaining
+* current powerup name/"normal"
+
+Block Types:
+* gamma block (g) - the hardest block to destroy (3 hits)
+* beta block (b) - the second hardest block to destroy (2 hits)
+* alpha block (a) - the easiest block to destroy (1 hit)
+* metal block (m) - can't be destroyed
+* sand block (q) - like metal block, except ball decelerates on rebound
+* trampoline block (t) - like metal block, except ball accelerates on rebound
+
+Extra feature:
+I'm not sure if having paddles on all walls is the extra feature or if that's simply what makes my version a
+variant of Breakout, so I'll create a "Customize" feature, which will present an interface that the user can
+use to change the coloring of their ball or select from multiple game backgrounds. This feature gives the
+user the freedom to craft their visual experience to their liking.
+
+Level 1 setup:
+basic rectangular mass with weaker blocks on outside
+
+		____
+
+
+		aaaaaaaa
+		abbbbbba
+|		abbggbba		|
+|		abbbbbba		|
+		aaaaaaaa
+
+
+		____
+
+
+Level 2 setup:
+metal diagonals, no alpha blocks, increasing difficulty 
+
+		____
+				       
+  				     
+    			   
+      mm	    mm  
+       mmbbbbbbmm
+		bbggggbb
+|		bbggggbb		|
+|	   mmbbbbbbmm		|
+	  mm	    mm		
+				   				   
+    			     	
+			     	   	
+		____
+
+
+Level 3 setup:
+trampoline and sand blocks on inside, making these interesting
+outer layer of alpha blocks - easy to destroy, hard to paddle the rebound because of proximity to wall
+
+		____
+				       
+  			     
+    	aaaaaaa		   
+      		      
+     a  tggsgggt  a
+	 a  gbbmgbbg  a
+|	 a  gbbgmbbg  a		|
+|    a  tgggsggt  a		|
+			
+		aaaaaaaa
+
+
+		____
+
