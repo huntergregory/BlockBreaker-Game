@@ -42,9 +42,10 @@ Block Types:
 
 Extra feature:
 I'll create a "Customize" feature, which will present an interface that the user can
-use to change the coloring of their ball or select from multiple game backgrounds. This 
+use to change the coloring of their ball or select from multiple game backgrounds. This
 feature gives the user the freedom to craft their visual experience to their liking.
 
+(Levels look bad on gitlab, so I took a screenshot and uploaded)
 Level 1 setup:
 basic rectangular mass with weaker blocks on outside
 
