@@ -9,14 +9,6 @@ reaching the "blocks". I enjoyed the low-level animation too.
 
 
 My Project
-Title: Block Breaker
-
-Inspiration: The original Breakout and one of its descendants - Brick Breaker (I loved to play this
-on my Dad's Blackberry).
-
-General Idea: Paddles on all 4 sides of the screen. The up and down arrow keys will control the left and
-right paddles; the left and right arrow keys the top and bottom paddles.
-
 
 Powerups (there will be multiple random powerups a level, placed in random blocks, and they'll fall towards
 whichever side of a block was hit e.g. could fall up towards the op paddle):
@@ -49,62 +41,61 @@ Block Types:
 * trampoline block (t) - like metal block, except ball accelerates on rebound
 
 Extra feature:
-I'm not sure if having paddles on all walls is the extra feature or if that's simply what makes my version a
-variant of Breakout, so I'll create a "Customize" feature, which will present an interface that the user can
-use to change the coloring of their ball or select from multiple game backgrounds. This feature gives the
-user the freedom to craft their visual experience to their liking.
+I'll create a "Customize" feature, which will present an interface that the user can
+use to change the coloring of their ball or select from multiple game backgrounds. This 
+feature gives the user the freedom to craft their visual experience to their liking.
 
 Level 1 setup:
 basic rectangular mass with weaker blocks on outside
 
-		____
-
-
-		aaaaaaaa
-		abbbbbba
+_________________________
+|                       |
+|                       |
+|		aaaaaaaa        |
+|		abbbbbba        |
 |		abbggbba		|
 |		abbbbbba		|
-		aaaaaaaa
-
-
-		____
+|		aaaaaaaa        |
+|                       |
+|                       |
+		 _____
 
 
 Level 2 setup:
 metal diagonals, no alpha blocks, increasing difficulty 
 
-		____
-				       
-  				     
-    			   
-      mm	    mm  
-       mmbbbbbbmm
-		bbggggbb
+_________________________
+|				        |
+|  				        |
+|    			        |
+|     mm	    mm      |
+|      mmbbbbbbmm       |
+|		bbggggbb        |
 |		bbggggbb		|
 |	   mmbbbbbbmm		|
-	  mm	    mm		
-				   				   
-    			     	
-			     	   	
-		____
+|	  mm	    mm		|
+|				   		|
+|   			     	|
+|			     	   	|
+       _____
 
 
 Level 3 setup:
 trampoline and sand blocks on inside, making these interesting
 outer layer of alpha blocks - easy to destroy, hard to paddle the rebound because of proximity to wall
 
-		____
-				       
-  			     
-    	aaaaaaa		   
-      		      
-     a  tggsgggt  a
-	 a  gbbmgbbg  a
+_________________________
+|				        |
+| 			            |
+|    	aaaaaaa		    |
+|      		            |
+|    a  tggsgggt  a     |
+|	 a  gbbmgbbg  a     |
 |	 a  gbbgmbbg  a		|
 |    a  tgggsggt  a		|
-			
-		aaaaaaaa
-
-
+|			            |
+|		aaaaaaaa        |
+|                       |
+|                       |
 		____
 
