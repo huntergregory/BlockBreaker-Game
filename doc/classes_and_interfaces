@@ -1,0 +1,64 @@
+Rough plan for code implementation
+
+Obstruction interface or abstract class?
+// included with Rectangle
+* getX/Y & setX/Y
+How to see if intersects ball:
+        paddle.getBoundsInParent().intersects(myBouncers[k].getBoundsInParent()))
+
+// static variables
+* final int - indestructible (-6 or -1)
+
+// instance variables
+* remaining hits - int
+* reflection multiplier - int (1 for all objects but sand and trampoline blocks)
+* color
+* height
+* width
+
+// public methods
+* collision
+
+
+Block abstract class extends Obstruction
+// static variables
+* final int - indestructible (-6)
+
+// instance variables
+* remaining hits - int
+* reflection multiplier - int (1 for all objects but sand and trampoline blocks)
+* color
+
+// public methods
+* collision - decrements remainingHits and updates block color
+
+// private methods
+* updateColor
+
+
+NormalBlock class extends Block
+// static variables
+* final Color alpha
+* final Color beta
+* final Color gamma
+
+
+Paddle class extends Obstruction
+//extra variable
+* final moving_speed
+
+
+Ball class extends ImageView
+// included with ImageView
+* getX/Y and setX/Y
+
+//instance variables
+* xVel
+* yVel
+* image
+* damage - usually 1
+
+
+
+// instance variables
+* reflection multiplier - int
