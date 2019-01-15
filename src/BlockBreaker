@@ -31,15 +31,16 @@ public class BlockBreaker extends Application {
     public static final Paint BACKGROUND = Color.AZURE; //FIX to make customizable
     public static final String BOUNCER_IMAGE = "ball.gif"; //FIX to make customizable
 
-    private Ball[] myBalls;
+    private Scene myScene;
+    //private Ball[] myBalls;
     private int myLives;
-    private Paddle[] myPaddles; // FIX 0, 1 are left, right OR 0, 2 are left, right
+    //private Paddle[] myPaddles; // FIX 0, 1 are left, right OR 0, 2 are left, right
     private ArrayList<Block> myBlocks;
     private int blocksLeft; // FIX might not need this
 
     /**
      * Initialize what will be displayed and how it will be updated.
-     * Taken from lab_bounce, authored by Robert Duvall.
+     * Adapted from lab_bounce, authored by Robert Duvall.
      */
     @Override
     public void start (Stage stage) {
@@ -48,12 +49,20 @@ public class BlockBreaker extends Application {
         stage.setScene(myScene);
         stage.setTitle(TITLE);
         stage.show();
+
+        /*
         // attach "game loop" to timeline to play it
         var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
         var animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
         animation.play();
+        */
+    }
+
+    private Scene setupGame(int width, int height, Paint backgroundColor) {
+        Group root = new Group();
+        return new Scene(root, width, height, backgroundColor);
     }
 
     public static void main(String[] args) {

@@ -1,0 +1,48 @@
+import javafx.scene.shape.Rectangle;
+
+/**
+ *
+ * @author Hunter Gregory
+ */
+public abstract class Block extends Rectangle {
+    private final static int INDESTRUCTIBLE = -1;
+
+    /**
+     * Number of hits a block can take before it is destroyed.
+     * A value of -1 represents that the block can't be destroyed.
+     */
+    private int myHitsRemaining;
+
+    /**
+     * Value used to increase, decrease, or maintain ball's velocity after
+     * reflecting off the block.
+     */
+    private int myReflectionMultiplier;
+
+    /**
+     * Updates internal state upon a collision with a ball.
+     */
+    abstract void collision();
+
+    /**
+     * @return block's reflection multiplier
+     */
+    public int getMultiplier() { return myReflectionMultiplier; }
+
+    /**
+     * Setter method for block's reflection multiplier
+     * @param multiplier
+     */
+    public void setMultiplier(int multiplier) { myReflectionMultiplier = multiplier; }
+
+    /**
+     * @return remaining hits for block
+     */
+    public int getHitsRemaining() { return myHitsRemaining; }
+
+    /**
+     * Setter method for block's hits remaining
+     * @param hitsRemaining
+     */
+    public void setHitsRemaining(int hitsRemaining) { myHitsRemaining = hitsRemaining; }
+}
