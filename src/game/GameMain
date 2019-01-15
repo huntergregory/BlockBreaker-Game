@@ -1,4 +1,4 @@
-//javafx imports
+package game;//javafx imports
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 /**
  A variant of the classic game Breakout, inspired by the original and its
  descendant - Brick Breaker.
-
  @author Hunter Gregory
  */
 public class GameMain extends Application {
@@ -24,9 +23,9 @@ public class GameMain extends Application {
     public static final String BOUNCER_IMAGE = "ball.gif"; //FIX to make customizable
 
     private Scene myScene;
-    //private Ball[] myBalls;
+    //private game.Ball[] myBalls;
     private int myLives;
-    //private Paddle[] myPaddles; // FIX 0, 1 are left, right OR 0, 2 are left, right
+    //private game.Paddle[] myPaddles; // FIX 0, 1 are left, right OR 0, 2 are left, right
     private ArrayList<Block> myBlocks;
     private int blocksLeft; // FIX might not need this
 

@@ -1,3 +1,4 @@
+package game;
 
 import javafx.scene.shape.Rectangle;
 
@@ -6,7 +7,7 @@ public class Paddle {
     private Rectangle myRect;
 
     /**
-     * Create a Paddle with an empty, rounded rectangle
+     * Create a game.Paddle with an empty, rounded rectangle
      */
     public Paddle() {
         myRect = new Rectangle();
@@ -15,7 +16,7 @@ public class Paddle {
     }
 
     /**
-     * @return Paddle's rectangle
+     * @return game.Paddle's rectangle
      */
     public Rectangle getRect() { return myRect; }
 

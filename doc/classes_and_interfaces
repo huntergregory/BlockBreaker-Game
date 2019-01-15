@@ -20,7 +20,7 @@ How to see if intersects ball:
 * collision
 
 
-Block abstract class extends Obstruction
+game.Block abstract class extends Obstruction
 // static variables
 * final int - indestructible (-6)
 
@@ -36,19 +36,19 @@ Block abstract class extends Obstruction
 * updateColor
 
 
-NormalBlock class extends Block
+NormalBlock class extends game.Block
 // static variables
 * final Color alpha
 * final Color beta
 * final Color gamma
 
 
-Paddle class extends Obstruction
+game.Paddle class extends Obstruction
 //extra variable
 * final moving_speed
 
 
-Ball class extends ImageView
+game.Ball class extends ImageView
 // included with ImageView
 * getX/Y and setX/Y
 

@@ -32,7 +32,7 @@ Status:
 * lives remaining
 * current powerup name/"normal"
 
-Block Types:
+game.Block Types:
 * gamma block (g) - the hardest block to destroy (3 hits)
 * beta block (b) - the second hardest block to destroy (2 hits)
 * alpha block (a) - the easiest block to destroy (1 hit)

@@ -1,3 +1,5 @@
+package game;
+
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -61,7 +63,7 @@ public class Block {
     }
 
     /**
-     * Create a Block with specified type and unspecified rectangle dimensions and position
+     * Create a game.Block with specified type and unspecified rectangle dimensions and position
      * @param type of block
      */
     public Block(BLOCK_TYPE type) {
@@ -86,7 +88,7 @@ public class Block {
 
     //returns null if the current object is an alpha block
     //and returns myType if the current block is indestructible
-                                            //FIX when considering super ball powerup
+                                            //FIX comments when considering super ball powerup
     private BLOCK_TYPE getNextType() {
         BLOCK_TYPE nextType = null;
         int currentHits = myType.getHitsRemaining();

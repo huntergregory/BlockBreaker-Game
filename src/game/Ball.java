@@ -1,3 +1,4 @@
+package game;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -8,7 +9,7 @@ public class Ball {
     private int myVelY;
 
     /**
-     * Create a Ball with an image and initial velocity of 0
+     * Create a game.Ball with an image and initial velocity of 0
      * @param image
      */
     public Ball(Image image) {
@@ -16,7 +17,7 @@ public class Ball {
     }
 
     /**
-     * Create a Ball with an image and specified velocity
+     * Create a game.Ball with an image and specified velocity
      * @param image
      * @param velX
      * @param velY
