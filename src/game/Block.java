@@ -71,7 +71,7 @@ public class Block {
         myType = type;
         updateBlockColor();
     }
-    
+
     private void updateBlockColor() {
         myRect.setFill(myType.getFillColor());
     }
@@ -88,7 +88,7 @@ public class Block {
 
     //returns null if the current object is an alpha block
     //and returns myType if the current block is indestructible
-                                            //FIX comments when considering super ball powerup
+    //FIX comments when considering super ball powerup
     private BLOCK_TYPE getNextType() {
         BLOCK_TYPE nextType = null;
         int currentHits = myType.getHitsRemaining();
@@ -102,7 +102,7 @@ public class Block {
         }
         return nextType;
     }
-    
+
     private void makeBlockTransition(BLOCK_TYPE nextType) {
         myType = nextType;
         updateBlockColor();

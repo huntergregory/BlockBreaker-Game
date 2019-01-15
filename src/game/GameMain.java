@@ -1,11 +1,12 @@
-package game;//javafx imports
+package game;
+
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
-//java.util imports
+
 import java.util.ArrayList;
 
 /**
@@ -41,14 +42,12 @@ public class GameMain extends Application {
         stage.setTitle(TITLE);
         stage.show();
 
-        /*
         // attach "game loop" to timeline to play it
         var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
         var animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
         animation.play();
-        */
     }
 
     private Scene setupGame(int width, int height, Paint backgroundColor) {
