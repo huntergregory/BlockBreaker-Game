@@ -1,19 +1,22 @@
 
 import javafx.scene.shape.Rectangle;
 
-public class Paddle extends Rectangle {
+public class Paddle {
+
+    private Rectangle myRect;
 
     /**
-     * Normal Constructor, identical to one of the Rectangle constructors
-     * @param x position
-     * @param y position
-     * @param width
-     * @param height
-     * @param type of block
+     * Create a Paddle with an empty, rounded rectangle
      */
-    public Paddle(int x, int y, int width, int height) {
-        super(x,y,width,height);
+    public Paddle() {
+        myRect = new Rectangle();
+        myRect.setArcWidth(20); //making paddle a rounded rectangle
+        myRect.setArcHeight(20);
     }
 
+    /**
+     * @return Paddle's rectangle
+     */
+    public Rectangle getRect() { return myRect; }
 
 }

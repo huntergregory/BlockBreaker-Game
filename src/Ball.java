@@ -2,26 +2,27 @@
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Ball extends ImageView {
-    private int myVelX = 0;
-    private int myVelY = 0;
+public class Ball {
+    private ImageView myImageView;
+    private int myVelX;
+    private int myVelY;
 
     /**
-     * Normal constructor for ball with intial velocity of 0
+     * Create a Ball with an image and initial velocity of 0
      * @param image
      */
     public Ball(Image image) {
-        super(image);
+        this(image, 0, 0);
     }
 
     /**
-     * Constructor that specifies velocity
+     * Create a Ball with an image and specified velocity
      * @param image
      * @param velX
      * @param velY
      */
     public Ball(Image image, int velX, int velY) {
-        this(image);
+        myImageView = new ImageView(image);
         myVelX = velX;
         myVelY = velY;
     }
