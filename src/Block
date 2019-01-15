@@ -1,48 +1,115 @@
 import javafx.scene.shape.Rectangle;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /**
  *
  * @author Hunter Gregory
  */
-public abstract class Block extends Rectangle {
+public class Block extends Rectangle {
     private final static int INDESTRUCTIBLE = -1;
+    private final static Paint ALPHA_COLOR = Color.AZURE; //FIX color of block with 1 hit remaining
+    private final static Paint BETA_COLOR = Color.AZURE; //FIX color of block with 2 hits remaining
+    private final static Paint GAMMA_COLOR = Color.AZURE; //FIX color of block with 3 hits remaining
+    private final static Paint METAL_COLOR = Color.GREY; //color of indestructible block
+    private final static Paint SAND_COLOR = Color.YELLOW; //color of indestructible, velocity-dampening block
+    private final static Paint TRAMP_COLOR = Color.RED; //color of indestructible, velocity-increasing block
 
     /**
-     * Number of hits a block can take before it is destroyed.
-     * A value of -1 represents that the block can't be destroyed.
+     * Contains all predefined properties of all block types.
+     * Properties are remainingHits until block is destroyed (-1 for indestructible blocks),
+     * reflectionMultiplier (value used to increase, decrease, or maintain ball's velocity after
+     * reflecting off the block), and the fillColor of the block.
      */
-    private int myHitsRemaining;
+    protected enum BLOCK_TYPE {
+        ALPHA(1, 1, ALPHA_COLOR),
+        BETA(2, 1, BETA_COLOR),
+        GAMMA(3, 1, GAMMA_COLOR),
+        METAL(INDESTRUCTIBLE, 1, METAL_COLOR),
+        SAND(INDESTRUCTIBLE, 0.5, SAND_COLOR),
+        TRAMPOLINE(INDESTRUCTIBLE, 1.5, TRAMP_COLOR);
+
+        private int remainingHits;
+        private double reflectionMultiplier;
+        private Paint fillColor;
+
+        //internal constructor
+        BLOCK_TYPE(int remainingHits, double reflectionMultiplier, Paint fillColor) {
+            this.remainingHits = remainingHits;
+            this.reflectionMultiplier = reflectionMultiplier;
+            this.fillColor = fillColor;
+        }
+
+        /**
+         * @return remaining hits for block
+         */
+        public int getHitsRemaining() { return remainingHits; }
+
+        /**
+         * @return block's reflection multiplier
+         */
+        public double getMultiplier() { return reflectionMultiplier; }
+
+        /**
+         * @return block's background/fill color
+         */
+        public Paint getFillColor() { return fillColor; }
+    }
+
+    private BLOCK_TYPE myType;
 
     /**
-     * Value used to increase, decrease, or maintain ball's velocity after
-     * reflecting off the block.
+     * Normal Constructor, identical to one of the Rectangle constructors with an additional BLOCK_TYPE parameter.
+     * @param x position
+     * @param y position
+     * @param width
+     * @param height
+     * @param type of block
      */
-    private int myReflectionMultiplier;
+    public Block(double x, double y, double width, double height, BLOCK_TYPE type) {
+        super(x, y, width, height);
+        myType = type;
+        updateBlockColor();
+    }
+    
+    private void updateBlockColor() {
+        this.setFill(myType.getFillColor());
+    }
 
     /**
      * Updates internal state upon a collision with a ball.
      */
-    abstract void collision();
+    public void collision() {
+        BLOCK_TYPE nextType = getNextType();
+        if (nextType == myType)
+            return;
+        makeBlockTransition(nextType); // assumes input != null i.e. block will be transitioning
+    }
+
+    //returns null if the current object is an alpha block
+    //and returns myType if the current block is indestructible
+                                            //FIX when considering super ball powerup
+    private BLOCK_TYPE getNextType() {
+        BLOCK_TYPE nextType = null;
+        int currentHits = myType.getHitsRemaining();
+        if (currentHits != INDESTRUCTIBLE) {
+            for (BLOCK_TYPE type : BLOCK_TYPE.values()) {
+                if (type.getHitsRemaining() == currentHits - 1) {
+                    nextType = type;
+                    break;
+                }
+            }
+        }
+        return nextType;
+    }
+    
+    private void makeBlockTransition(BLOCK_TYPE nextType) {
+        myType = nextType;
+        updateBlockColor();
+    }
 
     /**
      * @return block's reflection multiplier
      */
-    public int getMultiplier() { return myReflectionMultiplier; }
-
-    /**
-     * Setter method for block's reflection multiplier
-     * @param multiplier
-     */
-    public void setMultiplier(int multiplier) { myReflectionMultiplier = multiplier; }
-
-    /**
-     * @return remaining hits for block
-     */
-    public int getHitsRemaining() { return myHitsRemaining; }
-
-    /**
-     * Setter method for block's hits remaining
-     * @param hitsRemaining
-     */
-    public void setHitsRemaining(int hitsRemaining) { myHitsRemaining = hitsRemaining; }
+    public double getMultiplier() { return myType.getMultiplier(); }
 }
