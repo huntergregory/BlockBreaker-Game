@@ -8,12 +8,6 @@ import javafx.scene.paint.Paint;
  */
 public class Block extends Rectangle {
     private final static int INDESTRUCTIBLE = -1;
-    private final static Paint ALPHA_COLOR = Color.AZURE; //FIX color of block with 1 hit remaining
-    private final static Paint BETA_COLOR = Color.AZURE; //FIX color of block with 2 hits remaining
-    private final static Paint GAMMA_COLOR = Color.AZURE; //FIX color of block with 3 hits remaining
-    private final static Paint METAL_COLOR = Color.GREY; //color of indestructible block
-    private final static Paint SAND_COLOR = Color.YELLOW; //color of indestructible, velocity-dampening block
-    private final static Paint TRAMP_COLOR = Color.RED; //color of indestructible, velocity-increasing block
 
     /**
      * Contains all predefined properties of all block types.
@@ -22,12 +16,12 @@ public class Block extends Rectangle {
      * reflecting off the block), and the fillColor of the block.
      */
     protected enum BLOCK_TYPE {
-        ALPHA(1, 1, ALPHA_COLOR),
-        BETA(2, 1, BETA_COLOR),
-        GAMMA(3, 1, GAMMA_COLOR),
-        METAL(INDESTRUCTIBLE, 1, METAL_COLOR),
-        SAND(INDESTRUCTIBLE, 0.5, SAND_COLOR),
-        TRAMPOLINE(INDESTRUCTIBLE, 1.5, TRAMP_COLOR);
+        ALPHA(1, 1, Color.AZURE), // block with 1 hit remaining
+        BETA(2, 1, Color.AZURE),   // block with 2 hits remaining
+        GAMMA(3, 1, Color.AZURE), // block with 3 hits remaining
+        METAL(INDESTRUCTIBLE, 1, Color.GREY), // normal indestructible block
+        SAND(INDESTRUCTIBLE, 0.5, Color.YELLOW), // indestructible, velocity-dampening block
+        TRAMPOLINE(INDESTRUCTIBLE, 1.5, Color.RED); // indestructible, velocity-increasing block
 
         private int remainingHits;
         private double reflectionMultiplier;
