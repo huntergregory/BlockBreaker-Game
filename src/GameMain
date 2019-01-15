@@ -9,12 +9,12 @@ import javafx.stage.Stage;
 import java.util.ArrayList;
 
 /**
-A variant of the classic game Breakout, inspired by the original and its
-descendant - Brick Breaker.
+ A variant of the classic game Breakout, inspired by the original and its
+ descendant - Brick Breaker.
 
-@author Hunter Gregory
+ @author Hunter Gregory
  */
-public class BlockBreaker extends Application {
+public class GameMain extends Application {
     public static final String TITLE = "BlockBreaker";
     public static final int SIZE = 400;
     public static final int FRAMES_PER_SECOND = 60;
