@@ -127,6 +127,7 @@ public class GameMain extends Application {
         }
     }
 
+    //BALL IS BOUNCING OFF OF DEAD BLOCKS
     private void updateAllOnBlockCollision() {
         for (Ball ball : myBalls) {
             for (Block block : myBlocks) {
@@ -142,16 +143,30 @@ public class GameMain extends Application {
     private void reflectBallOffBlock(Ball ball, Block block) {
         double multiplier = block.getMultiplier();
         double newVelX = Math.round(multiplier * ball.getVelX());
-        double newVelY = Math.round(multiplier * -1 * ball.getVelY());
-        ball.setVelX((int) newVelX);
-        ball.setVelY((int) newVelY);
+        double newVelY = Math.round(multiplier * ball.getVelY());
+
+        if (isVerticalCollision(ball, block))
+            newVelY *= -1;
+        else
+            newVelX *= -1;
+
+        ball.setVelX((int) newVelX); //DEBUGGING, FIX
+        ball.setVelY((int) newVelY); //DEBUGGING, FIX
+    }
+
+    private boolean isVerticalCollision(Ball ball, Block block) {
+        System.out.printf("Ball at x=%.1f with width=%.1f, and block is at x=%.1f with width=%.1f.\n",
+                ball.getX(), ball.getBoundsInParent().getWidth(), block.getX(), block.getBoundsInParent().getWidth());
+        //center of ball is outside the block (related to y position)
+        double yCenter = ball.getY() + ball.getBoundsInParent().getHeight() / 2;
+        return yCenter > block.getY() || yCenter < block.getY() + block.getBoundsInParent().getHeight();
     }
 
     private void deleteBlockIfNecessary(Block block) {
         boolean blockIsDestroyed = block.updateOnCollision();
         if (blockIsDestroyed) {
             myRoot.getChildren().remove(block);
-            myBalls.remove(block);
+            myBlocks.remove(block);
         }
     }
 
