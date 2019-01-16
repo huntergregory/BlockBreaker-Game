@@ -29,11 +29,11 @@ public class GameMain extends Application {
     public static final double BLOCK_WIDTH = 45; // adjusted to this value for aesthetics
     public static final double BLOCK_HEIGHT = 15; // adjusted to this value for aesthetics
     public static final int MAX_LIVES = 3;
+    private Level[] myLevels = { new LevelOne() };
 
     private Scene myScene;
     private int myLives = MAX_LIVES;
-    private int currentLevelNumber;
-    private ArrayList<Level> myLevels;
+    private int currentLevelNumber; // 0 based
     private ArrayList<Block> myBlocks;
     private ArrayList<Ball> myBalls;
     private Paddle myPaddle;
@@ -62,8 +62,7 @@ public class GameMain extends Application {
     private Scene setupGame(int width, int height, Paint backgroundColor) {
         Group root = new Group();
         myScene = new Scene(root, width, height, backgroundColor);
-
-        currentLevelNumber = 1; //FIX??
+        currentLevelNumber = 0; //FIX??
         createNewLevel();
         resetBallAndPaddle();
         addAllChildrenTo(root);
@@ -73,8 +72,8 @@ public class GameMain extends Application {
 
     //assumes currentLevelNumber was incremented and that there is a next level
     private void createNewLevel() {
-        Level nextLevel = myLevels.get(currentLevelNumber);
-        myBlocks = nextLevel.initialize();
+        Level nextLevel = myLevels[currentLevelNumber];
+        myBlocks = nextLevel.initialize(myScene.getWidth(), myScene.getHeight());
     }
 
     private void resetBallAndPaddle() {
