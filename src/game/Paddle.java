@@ -2,6 +2,9 @@ package game;
 
 import javafx.scene.shape.Rectangle;
 
+/**
+ * @author Hunter Gregory
+ */
 public class Paddle {
 
     private Rectangle myRect;

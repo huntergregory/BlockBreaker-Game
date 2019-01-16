@@ -3,8 +3,10 @@ package game;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
-public class Ball {
-    private ImageView myImageView;
+/**
+ * @author Hunter Gregory
+ */
+public class Ball extends ImageView {
     private int myVelX;
     private int myVelY;
 
@@ -23,7 +25,7 @@ public class Ball {
      * @param velY
      */
     public Ball(Image image, int velX, int velY) {
-        myImageView = new ImageView(image);
+        super(image);
         myVelX = velX;
         myVelY = velY;
     }

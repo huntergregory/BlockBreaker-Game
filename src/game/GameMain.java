@@ -6,12 +6,8 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -29,13 +25,18 @@ public class GameMain extends Application {
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final Paint BACKGROUND = Color.AZURE; //FIX to make customizable
-    public static final String BOUNCER_IMAGE = "ball.gif"; //FIX to make customizable
+    public static final String BALL_IMAGE = "ball.gif"; //FIX to make customizable
+    public static final double BLOCK_WIDTH = 45; // adjusted to this value for aesthetics
+    public static final double BLOCK_HEIGHT = 15; // adjusted to this value for aesthetics
+    public static final int MAX_LIVES = 3;
 
     private Scene myScene;
-    private Ball[] myBalls;
-    private int myLives;
-    private Paddle myPaddle;
+    private int myLives = MAX_LIVES;
+    private int currentLevelNumber;
+    private ArrayList<Level> myLevels;
     private ArrayList<Block> myBlocks;
+    private ArrayList<Ball> myBalls;
+    private Paddle myPaddle;
     private int blocksLeft; // FIX might not need this
 
     /**
@@ -49,40 +50,61 @@ public class GameMain extends Application {
         stage.setScene(myScene);
         stage.setTitle(TITLE);
         stage.show();
-/*
+
         // attach "game loop" to timeline to play it
         var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
         var animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
-        animation.play(); */
+        animation.play();
     }
 
     private Scene setupGame(int width, int height, Paint backgroundColor) {
         Group root = new Group();
         myScene = new Scene(root, width, height, backgroundColor);
-        
-        createLevel();
-        for (Block b : myBlocks) {
-            root.getChildren().add(b);
-        }
+
+        currentLevelNumber = 1; //FIX??
+        createNewLevel();
+        resetBallAndPaddle();
+        addAllChildrenTo(root);
 
         return myScene;
     }
 
-    private void createLevel() {
-        myBlocks = new ArrayList<>();
-        Block b = new Block(Block.BLOCK_TYPE.ALPHA);
-        b.setPosition(10, 10);
-        myBlocks.add(b);
-        b = new Block(Block.BLOCK_TYPE.BETA);
-        b.setPosition(100, 100);
-        myBlocks.add(b);
+    //assumes currentLevelNumber was incremented and that there is a next level
+    private void createNewLevel() {
+        Level nextLevel = myLevels.get(currentLevelNumber);
+        myBlocks = nextLevel.initialize();
+    }
+
+    private void resetBallAndPaddle() {
+        //Erase all old balls and create new one
+        myBalls = new ArrayList<>();
+        Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
+        Ball ball = new Ball(image, 10,10);
+        ball.setX(45);
+        ball.setY(75);
+        myBalls.add(ball);
+
+        //reset paddle
+        myPaddle = new Paddle();
+    }
+
+    private void addAllChildrenTo(Group root) {
+        for (Block block : myBlocks) {
+            root.getChildren().add(block);
+        }
+
+        //root.getChildren().add(myPaddle); //FIX
+
+        for (Ball ball : myBalls) {
+            root.getChildren().add(ball);
+        }
     }
 
     // Change properties of shapes to animate them
     private void step (double elapsedTime) {
-
+        //FIX
     }
 
     public static void main(String[] args) {

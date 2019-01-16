@@ -46,7 +46,7 @@ use to change the coloring of their ball or select from multiple game background
 feature gives the user the freedom to craft their visual experience to their liking.
 
 (Levels look bad on gitlab, so I took a screenshot and uploaded)
-Level 1 setup:
+game.Level 1 setup:
 basic rectangular mass with weaker blocks on outside
 
 _________________________
@@ -62,7 +62,7 @@ _________________________
 		 _____
 
 
-Level 2 setup:
+game.Level 2 setup:
 metal diagonals, no alpha blocks, increasing difficulty 
 
 _________________________
@@ -81,7 +81,7 @@ _________________________
        _____
 
 
-Level 3 setup:
+game.Level 3 setup:
 trampoline and sand blocks on inside, making these interesting
 outer layer of alpha blocks - easy to destroy, hard to paddle the rebound because of proximity to wall
 
