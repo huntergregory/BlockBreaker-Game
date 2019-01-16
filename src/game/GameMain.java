@@ -103,13 +103,19 @@ public class GameMain extends Application {
     // Change properties of shapes to animate them
     /*
     FIX THESE:
-        1. deal with null block (delete it)
         2. consider when ball hits block from left and right (only works now if it hits bottom or top)
      */
     private void step (double elapsedTime) {
         moveBalls(elapsedTime);
         updateBallsOnWallCollision();
         updateAllOnBlockCollision();
+    }
+
+    private void moveBalls(double elapsedTime) {
+        for (Ball ball : myBalls) {
+            ball.setX(ball.getX() + ball.getVelX() * elapsedTime);
+            ball.setY(ball.getY() + ball.getVelY() * elapsedTime);
+        }
     }
 
     private void updateBallsOnWallCollision() {
@@ -125,27 +131,27 @@ public class GameMain extends Application {
         for (Ball ball : myBalls) {
             for (Block block : myBlocks) {
                 if (block.getBoundsInParent().intersects(ball.getBoundsInParent())) {
-                    double multiplier = block.getMultiplier();
-                    double newVelX = Math.round(multiplier * ball.getVelX());
-                    double newVelY = Math.round(multiplier * -1 * ball.getVelY());
-                    ball.setVelX((int) newVelX);
-                    ball.setVelY((int) newVelY);
-
-                    boolean blockIsDestroyed = block.updateOnCollision();
-                    if (blockIsDestroyed) {
-                        myRoot.getChildren().remove(block);
-                        myBalls.remove(block);
-                    }
-                    break; // out of block loop
+                    reflectBallOffBlock(ball, block);
+                    deleteBlockIfNecessary(block);
+                    break; // out of block loop //FIX?
                 }
             }
         }
     }
 
-    private void moveBalls(double elapsedTime) {
-        for (Ball ball : myBalls) {
-            ball.setX(ball.getX() + ball.getVelX() * elapsedTime);
-            ball.setY(ball.getY() + ball.getVelY() * elapsedTime);
+    private void reflectBallOffBlock(Ball ball, Block block) {
+        double multiplier = block.getMultiplier();
+        double newVelX = Math.round(multiplier * ball.getVelX());
+        double newVelY = Math.round(multiplier * -1 * ball.getVelY());
+        ball.setVelX((int) newVelX);
+        ball.setVelY((int) newVelY);
+    }
+
+    private void deleteBlockIfNecessary(Block block) {
+        boolean blockIsDestroyed = block.updateOnCollision();
+        if (blockIsDestroyed) {
+            myRoot.getChildren().remove(block);
+            myBalls.remove(block);
         }
     }
 
