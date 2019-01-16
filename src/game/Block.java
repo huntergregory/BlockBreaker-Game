@@ -1,14 +1,13 @@
 package game;
 
-import javafx.scene.shape.Rectangle;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 
 /**
  *
  * @author Hunter Gregory
  */
-public class Block {
+public class Block extends ImageView {
     private final static int INDESTRUCTIBLE = -1;
 
     /**
@@ -18,22 +17,22 @@ public class Block {
      * reflecting off the block), and the fillColor of the block.
      */
     protected enum BLOCK_TYPE {
-        ALPHA(1, 1, Color.AZURE), // block with 1 hit remaining
-        BETA(2, 1, Color.AZURE),   // block with 2 hits remaining
-        GAMMA(3, 1, Color.AZURE), // block with 3 hits remaining
-        METAL(INDESTRUCTIBLE, 1, Color.GREY), // normal indestructible block
-        SAND(INDESTRUCTIBLE, 0.5, Color.YELLOW), // indestructible, velocity-dampening block
-        TRAMPOLINE(INDESTRUCTIBLE, 1.5, Color.RED); // indestructible, velocity-increasing block
+        ALPHA(1, 1, "brick6.gif"), // block with 1 hit remaining
+        BETA(2, 1, "brick7.gif"),  // block with 2 hits remaining
+        GAMMA(3, 1, "brick8.gif"), // block with 3 hits remaining
+        METAL(INDESTRUCTIBLE, 1, "brick3.gif"), // normal indestructible block
+        SAND(INDESTRUCTIBLE, 0.5, "brick5.gif"), // indestructible, velocity-dampening block
+        TRAMPOLINE(INDESTRUCTIBLE, 1.5, "brick4.gif"); // indestructible, velocity-increasing block
 
         private int remainingHits;
         private double reflectionMultiplier;
-        private Paint fillColor;
+        private String image;
 
         //internal constructor
-        BLOCK_TYPE(int remainingHits, double reflectionMultiplier, Paint fillColor) {
+        BLOCK_TYPE(int remainingHits, double reflectionMultiplier, String image) {
             this.remainingHits = remainingHits;
             this.reflectionMultiplier = reflectionMultiplier;
-            this.fillColor = fillColor;
+            this.image = image;
         }
 
         /**
@@ -47,12 +46,11 @@ public class Block {
         public double getMultiplier() { return reflectionMultiplier; }
 
         /**
-         * @return block's background/fill color
+         * @return block's image
          */
-        public Paint getFillColor() { return fillColor; }
+        public String getImage() { return image; }
     }
 
-    private Rectangle myRect;
     private BLOCK_TYPE myType;
 
     /**
@@ -67,13 +65,14 @@ public class Block {
      * @param type of block
      */
     public Block(BLOCK_TYPE type) {
-        myRect = new Rectangle();
+        super();
         myType = type;
-        updateBlockColor();
+        updateBlockImage();
     }
 
-    private void updateBlockColor() {
-        myRect.setFill(myType.getFillColor());
+    private void updateBlockImage() {
+        Image image = new Image(getClass().getClassLoader().getResourceAsStream(myType.getImage()));
+        this.setImage(image);
     }
 
     /**
@@ -83,7 +82,7 @@ public class Block {
         BLOCK_TYPE nextType = getNextType();
         if (nextType == myType)
             return;
-        makeBlockTransition(nextType); // assumes input != null i.e. block will be transitioning
+        transitionToBlock(nextType); // assumes input != null i.e. block will be transitioning
     }
 
     //returns null if the current object is an alpha block
@@ -103,13 +102,23 @@ public class Block {
         return nextType;
     }
 
-    private void makeBlockTransition(BLOCK_TYPE nextType) {
+    private void transitionToBlock(BLOCK_TYPE nextType) {
         myType = nextType;
-        updateBlockColor();
+        updateBlockImage();
     }
 
     /**
      * @return block's reflection multiplier
      */
     public double getMultiplier() { return myType.getMultiplier(); }
+
+    /**
+     * Position the Block
+     * @param x
+     * @param y
+     */
+    public void setPosition(double x, double y) {
+        this.setX(x);
+        this.setY(y);
+    }
 }

@@ -32,15 +32,15 @@ public class GameMain extends Application {
     public static final String BOUNCER_IMAGE = "ball.gif"; //FIX to make customizable
 
     private Scene myScene;
-    //private game.Ball[] myBalls;
+    private Ball[] myBalls;
     private int myLives;
-    //private game.Paddle[] myPaddles; // FIX 0, 1 are left, right OR 0, 2 are left, right
+    private Paddle myPaddle;
     private ArrayList<Block> myBlocks;
     private int blocksLeft; // FIX might not need this
 
     /**
      * Initialize what will be displayed and how it will be updated.
-     * Adapted from lab_bounce, authored by Robert Duvall.
+     * Adapted from lab_bounce (authored by Robert Duvall).
      */
     @Override
     public void start (Stage stage) {
@@ -55,12 +55,34 @@ public class GameMain extends Application {
         var animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
         animation.getKeyFrames().add(frame);
-        animation.play();*/
+        animation.play(); */
     }
 
     private Scene setupGame(int width, int height, Paint backgroundColor) {
         Group root = new Group();
-        return new Scene(root, width, height, backgroundColor);
+        myScene = new Scene(root, width, height, backgroundColor);
+        
+        createLevel();
+        for (Block b : myBlocks) {
+            root.getChildren().add(b);
+        }
+
+        return myScene;
+    }
+
+    private void createLevel() {
+        myBlocks = new ArrayList<>();
+        Block b = new Block(Block.BLOCK_TYPE.ALPHA);
+        b.setPosition(10, 10);
+        myBlocks.add(b);
+        b = new Block(Block.BLOCK_TYPE.BETA);
+        b.setPosition(100, 100);
+        myBlocks.add(b);
+    }
+
+    // Change properties of shapes to animate them
+    private void step (double elapsedTime) {
+
     }
 
     public static void main(String[] args) {
