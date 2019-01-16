@@ -6,7 +6,7 @@ import javafx.scene.image.Image;
 /**
  * An ImageView representing a multitude of different block types, some of which are indestructible, and some of
  * which dampen or increase the velocity of a reflected ball. Each instance internally deals with changing its
- * block type upon a call to the collision() method.
+ * block type upon a call to the updateOnCollision() method.
  * @author Hunter Gregory
  */
 public class Block extends ImageView {
@@ -79,10 +79,16 @@ public class Block extends ImageView {
 
     /**
      * Updates internal state and updates block's type if necessary.
+     * @return true if block should be destroyed after collision, false otherwise
      */
-    public void collision() {
+    public boolean updateOnCollision() {
         BLOCK_TYPE nextType = getNextType();
-        transitionToBlock(nextType);
+        if (nextType == null) {
+            return true;
+        }
+        myType = nextType;
+        updateBlockImage();
+        return false;
     }
 
     //returns null if the current object is an alpha block
@@ -100,17 +106,6 @@ public class Block extends ImageView {
             }
         }
         return nextType;
-    }
-
-    private void transitionToBlock(BLOCK_TYPE nextType) {
-        if (nextType == null)
-            deleteBlock();
-        myType = nextType;
-        updateBlockImage();
-    }
-
-    private void deleteBlock() {
-        //FIXXXXXXXXXXX
     }
 
     /**

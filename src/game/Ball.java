@@ -4,6 +4,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 /**
+ * An ImageView with velocity components, representing a ball.
+ * Position must be set using ImageView methods after the object is created.
  * @author Hunter Gregory
  */
 public class Ball extends ImageView {
@@ -19,7 +21,7 @@ public class Ball extends ImageView {
     }
 
     /**
-     * Create a game.Ball with an image and specified velocity
+     * Create a Ball with an image and specified velocity
      * @param image
      * @param velX
      * @param velY

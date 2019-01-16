@@ -26,12 +26,11 @@ public class GameMain extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final Paint BACKGROUND = Color.AZURE; //FIX to make customizable
     public static final String BALL_IMAGE = "ball.gif"; //FIX to make customizable
-    public static final double BLOCK_WIDTH = 45; // adjusted to this value for aesthetics
-    public static final double BLOCK_HEIGHT = 15; // adjusted to this value for aesthetics
     public static final int MAX_LIVES = 3;
     private Level[] myLevels = { new LevelOne() };
 
     private Scene myScene;
+    private Group myRoot;
     private int myLives = MAX_LIVES;
     private int currentLevelNumber; // 0 based
     private ArrayList<Block> myBlocks;
@@ -60,12 +59,12 @@ public class GameMain extends Application {
     }
 
     private Scene setupGame(int width, int height, Paint backgroundColor) {
-        Group root = new Group();
-        myScene = new Scene(root, width, height, backgroundColor);
+        myRoot = new Group();
+        myScene = new Scene(myRoot, width, height, backgroundColor);
         currentLevelNumber = 0; //FIX??
         createNewLevel();
         resetBallAndPaddle();
-        addAllChildrenTo(root);
+        addAllChildrenTo();
 
         return myScene;
     }
@@ -80,30 +79,74 @@ public class GameMain extends Application {
         //Erase all old balls and create new one
         myBalls = new ArrayList<>();
         Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
-        Ball ball = new Ball(image, 10,10);
-        ball.setX(45);
-        ball.setY(75);
+        Ball ball = new Ball(image, 60,-60); // FIX
+        ball.setX(100);                                  // FIX
+        ball.setY(350);                                  // FIX
         myBalls.add(ball);
 
         //reset paddle
         myPaddle = new Paddle();
     }
 
-    private void addAllChildrenTo(Group root) {
+    private void addAllChildrenTo() {
         for (Block block : myBlocks) {
-            root.getChildren().add(block);
+            myRoot.getChildren().add(block);
         }
 
-        //root.getChildren().add(myPaddle); //FIX
+        //myRoot.getChildren().add(myPaddle); //FIX
 
         for (Ball ball : myBalls) {
-            root.getChildren().add(ball);
+            myRoot.getChildren().add(ball);
         }
     }
 
     // Change properties of shapes to animate them
+    /*
+    FIX THESE:
+        1. deal with null block (delete it)
+        2. consider when ball hits block from left and right (only works now if it hits bottom or top)
+     */
     private void step (double elapsedTime) {
-        //FIX
+        moveBalls(elapsedTime);
+        updateBallsOnWallCollision();
+        updateAllOnBlockCollision();
+    }
+
+    private void updateBallsOnWallCollision() {
+        for (Ball ball : myBalls) {
+            if (ball.getX() <= 0 || ball.getX() + ball.getBoundsInParent().getWidth() >= myScene.getWidth())
+                ball.setVelX(ball.getVelX() * -1);
+            if (ball.getY() <= 0 || ball.getY() + ball.getBoundsInParent().getHeight() >= myScene.getHeight())
+                ball.setVelY(ball.getVelY() * -1);
+        }
+    }
+
+    private void updateAllOnBlockCollision() {
+        for (Ball ball : myBalls) {
+            for (Block block : myBlocks) {
+                if (block.getBoundsInParent().intersects(ball.getBoundsInParent())) {
+                    double multiplier = block.getMultiplier();
+                    double newVelX = Math.round(multiplier * ball.getVelX());
+                    double newVelY = Math.round(multiplier * -1 * ball.getVelY());
+                    ball.setVelX((int) newVelX);
+                    ball.setVelY((int) newVelY);
+
+                    boolean blockIsDestroyed = block.updateOnCollision();
+                    if (blockIsDestroyed) {
+                        myRoot.getChildren().remove(block);
+                        myBalls.remove(block);
+                    }
+                    break; // out of block loop
+                }
+            }
+        }
+    }
+
+    private void moveBalls(double elapsedTime) {
+        for (Ball ball : myBalls) {
+            ball.setX(ball.getX() + ball.getVelX() * elapsedTime);
+            ball.setY(ball.getY() + ball.getVelY() * elapsedTime);
+        }
     }
 
     public static void main(String[] args) {
