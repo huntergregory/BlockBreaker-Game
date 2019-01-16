@@ -103,6 +103,7 @@ public class GameMain extends Application {
     // Change properties of shapes to animate them
     /*
     FIX THESE:
+        1. deal with null block (delete it)
         2. consider when ball hits block from left and right (only works now if it hits bottom or top)
      */
     private void step (double elapsedTime) {
@@ -111,26 +112,12 @@ public class GameMain extends Application {
         updateAllOnBlockCollision();
     }
 
-    private void moveBalls(double elapsedTime) {
-        for (Ball ball : myBalls) {
-            ball.setX(ball.getX() + ball.getVelX() * elapsedTime);
-            ball.setY(ball.getY() + ball.getVelY() * elapsedTime);
-        }
-    }
-
-    //FIX ball bounces off bottom
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            if (ball.getY() <= 0 || ball.getY() + ball.getBoundsInParent().getHeight() >= myScene.getHeight()) //DELETE second part, see below
-                ball.setVelY(ball.getVelY() * -1);
-
             if (ball.getX() <= 0 || ball.getX() + ball.getBoundsInParent().getWidth() >= myScene.getWidth())
                 ball.setVelX(ball.getVelX() * -1);
-
-            if (ball.getY() + ball.getBoundsInParent().getHeight() >= myScene.getHeight() &&
-                        myBalls.size() == 1)
-                //endCurrentLife(); //FIX
-                continue;
+            if (ball.getY() <= 0 || ball.getY() + ball.getBoundsInParent().getHeight() >= myScene.getHeight())
+                ball.setVelY(ball.getVelY() * -1);
         }
     }
 
@@ -138,57 +125,28 @@ public class GameMain extends Application {
         for (Ball ball : myBalls) {
             for (Block block : myBlocks) {
                 if (block.getBoundsInParent().intersects(ball.getBoundsInParent())) {
-                    reflectBallOffBlock(ball, block);
-                    updateBlock(block);
+                    double multiplier = block.getMultiplier();
+                    double newVelX = Math.round(multiplier * ball.getVelX());
+                    double newVelY = Math.round(multiplier * -1 * ball.getVelY());
+                    ball.setVelX((int) newVelX);
+                    ball.setVelY((int) newVelY);
+
+                    boolean blockIsDestroyed = block.updateOnCollision();
+                    if (blockIsDestroyed) {
+                        myRoot.getChildren().remove(block);
+                        myBalls.remove(block);
+                    }
+                    break; // out of block loop
                 }
             }
         }
     }
 
-    private void updateBlock(Block block) {
-        boolean blockIsDestroyed = block.updateOnCollision();
-        if (blockIsDestroyed) {
-            myRoot.getChildren().remove(block);
-            myBalls.remove(block);
+    private void moveBalls(double elapsedTime) {
+        for (Ball ball : myBalls) {
+            ball.setX(ball.getX() + ball.getVelX() * elapsedTime);
+            ball.setY(ball.getY() + ball.getVelY() * elapsedTime);
         }
-    }
-
-    private void reflectBallOffBlock(Ball ball, Block block) {
-        double multiplier = block.getMultiplier();
-        double newVelX = Math.round(multiplier * ball.getVelX());
-        double newVelY = Math.round(multiplier * ball.getVelY());
-        if (true) //FIX to vertical
-            newVelY *= -1;
-        else
-            newVelX *= -1;
-
-        ball.setVelX((int) newVelX);
-        ball.setVelY((int) newVelY);
-    }
-
-    private boolean verticalCollision(Ball ball, Block block) {
-        return ball.getX() + ball.getBoundsInParent().getWidth() >= block.getX() ||
-                ball.getX() <= block.getX() + block.getBoundsInParent().getWidth();
-    }
-
-
-    //FIX
-    private void endCurrentLife() {
-        myLives -= 1;
-        if (myLives == 0)
-            endGame();
-        else
-            continueWithNewLife();
-    }
-
-    //FIX
-    private void continueWithNewLife() {
-        //??????
-    }
-
-    //FIX
-    private void endGame() {
-        //???????
     }
 
     public static void main(String[] args) {
