@@ -155,11 +155,9 @@ public class GameMain extends Application {
     }
 
     private boolean isVerticalCollision(Ball ball, Block block) {
-        System.out.printf("Ball at x=%.1f with width=%.1f, and block is at x=%.1f with width=%.1f.\n",
-                ball.getX(), ball.getBoundsInParent().getWidth(), block.getX(), block.getBoundsInParent().getWidth());
-        //center of ball is outside the block (related to y position)
-        double yCenter = ball.getY() + ball.getBoundsInParent().getHeight() / 2;
-        return yCenter > block.getY() || yCenter < block.getY() + block.getBoundsInParent().getHeight();
+        double ballCenterX = ball.getX() + ball.getBoundsInParent().getWidth() / 2;
+        double blockWidth = block.getBoundsInParent().getWidth();
+        return block.getX() < ballCenterX && ballCenterX < block.getX() + blockWidth;
     }
 
     private void deleteBlockIfNecessary(Block block) {
