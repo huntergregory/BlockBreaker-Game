@@ -51,6 +51,7 @@ public class GameMain extends Application {
     private Paddle myPaddle;
     private int blocksLeft; // FIX might not need this
     private boolean myGameIsPaused;
+    private boolean myGameIsOver;
 
     /**
      * Initialize what will be displayed and how it will be updated.
@@ -118,6 +119,8 @@ public class GameMain extends Application {
     }
 
     private void handleMovingPaddle(KeyCode code) {
+        if (myGameIsOver)
+            return;
         if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE) {
             myPaddle.setX(myPaddle.getX() + PADDLE_SPEED); //currently overshoots boundary a little due to large PADDLE_SPEED
         }
@@ -131,6 +134,8 @@ public class GameMain extends Application {
     }
 
     private void handleMouseClick() {
+        if (myGameIsOver)
+            return;
         myGameIsPaused = !myGameIsPaused;
         ObservableList<Node> rootChildren = mySceneManager.getCurrentRoot().getChildren();
         if (myGameIsPaused) {
@@ -144,12 +149,14 @@ public class GameMain extends Application {
     }
 
     private void step (double elapsedTime) {
-        if (!myGameIsPaused) {
-            moveBalls(elapsedTime);
-            updateBallsOnWallCollision();
-            updateBallsOnPaddleCollision();
-            updateAllOnBlockCollision();
-        }
+        if (myGameIsPaused || myGameIsOver)
+            return;
+        
+        moveBalls(elapsedTime);
+        updateBallsOnWallCollision();
+        updateBallsOnPaddleCollision();
+        updateAllOnBlockCollision();
+        myGameIsOver = !oneBallInBounds();
     }
 
     private void moveBalls(double elapsedTime) {
@@ -160,13 +167,13 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            double sceneWidth = mySceneManager.getCurrentScene().getWidth();
-            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= sceneWidth)
-                ball.multiplyVelX(-1);
-
             double sceneHeight = mySceneManager.getCurrentScene().getHeight();
             if (ball.getY() <= 0 || ball.getY() + ball.HEIGHT >= sceneHeight)
                 ball.multiplyVelY(-1);
+
+                double sceneWidth = mySceneManager.getCurrentScene().getWidth();
+            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= sceneWidth)
+                ball.multiplyVelX(-1);
         }
     }
 
@@ -223,6 +230,28 @@ public class GameMain extends Application {
             mySceneManager.getCurrentRoot().getChildren().remove(block.getImageView());
             myBlocks.remove(block);
         }
+    }
+
+    private boolean oneBallInBounds() {
+        for (Ball ball : myBalls) {
+            if (ball.getY() + Ball.HEIGHT >= mySceneManager.getCurrentScene().getHeight()) {
+                if (myBalls.size() == 1) {
+                    ball.multiplyVelY(0); //freeze the ball if its the last one
+                    ball.multiplyVelX(0);
+                    return false;
+                }
+                else {
+                    deleteBall(ball);
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void deleteBall(Ball ball) {
+        mySceneManager.getCurrentRoot().getChildren().remove(ball.getImageView());
+        myBalls.remove(ball);
     }
 
     public static void main(String[] args) {
