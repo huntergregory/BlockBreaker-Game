@@ -151,7 +151,7 @@ public class GameMain extends Application {
     private void step (double elapsedTime) {
         if (myGameIsPaused || myGameIsOver)
             return;
-        
+
         moveBalls(elapsedTime);
         updateBallsOnWallCollision();
         updateBallsOnPaddleCollision();

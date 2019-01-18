@@ -11,24 +11,31 @@ Start Date: 1/13/18
 
 Finish Date: 
 
-Hours Spent: 11.5
+Hours Spent: 16.5
 
 ### Resources Used
-
+- https://docs.oracle.com/javase/8/javafx/api/javafx/
 
 ### Running the Program
 
-Main class:
+Main class: 
+- GameMain
 
 Data files needed: 
+- resources folder
 
-Key/Mouse inputs:
+Key/Mouse inputs: 
+- Click to Pause
+- Move Paddle with left and right keys
 
 Cheat keys:
+- k
 
 Known Bugs:
+- k
 
 Extra credit:
+- j
 
 
 ### Notes
