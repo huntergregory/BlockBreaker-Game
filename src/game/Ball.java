@@ -13,6 +13,7 @@ public class Ball {
     public static final int HEIGHT = 15;
     public static final int MAX_VEL = 120;
     public static final int MIN_VEL = 50;
+    public static final String IMAGE_NAME = "ball.gif"; //FIX to make customizable
 
     private int myVelX;
     private int myVelY;

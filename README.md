@@ -22,7 +22,7 @@ Main class:
 - GameMain
 
 Data files needed: 
-- resources folder
+- all gifs in resources folder
 
 Key/Mouse inputs: 
 - Click to Pause

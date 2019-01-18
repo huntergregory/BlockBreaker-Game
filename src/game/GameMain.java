@@ -20,16 +20,20 @@ import java.util.ArrayList;
 /**
  A variant of the classic game Breakout, inspired by the original and its
  descendant - Brick Breaker.
+ This class has large dependencies on SceneManager which will do the following for GameMain:
+  - store all scenes, levels, and roots
+  - initiate and manage the splash scene and customization scene entirely
+  - switch between scenes and keep track of current scene and root
+  - reset and return balls, paddles, and blocks
+ GameMain must manage all ball, paddle, block updates as well as user input within levels.
  @author Hunter Gregory
  */
 public class GameMain extends Application {
     public static final String TITLE = "BlockBreaker";
     public static final int SIZE = 400;
-    public static final int FRAMES_PER_SECOND = 300;
+    public static final int FRAMES_PER_SECOND = 300; // less paddle lag at this number
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-    public static final Paint BACKGROUND = Color.AZURE; //FIX to make customizable
-    public static final String BALL_IMAGE = "ball.gif"; //FIX to make customizable
     public static final int PADDLE_SPEED = 20;
     public static final int MAX_LIVES = 3;
     public static final Level[] LEVELS = { new LevelOne(), new LevelOne() };
@@ -75,36 +79,10 @@ public class GameMain extends Application {
     }
 
     private void addLevelComponents() {
-        myBlocks = mySceneManager.getCurrentLevelBlocks();
-        resetBalls();
-        resetPaddle();
-        addAllChildrenToRoot();
+        myBlocks = mySceneManager.getNewLevelBlocks();
+        myBalls = mySceneManager.resetAndGetBalls();
+        myPaddle = mySceneManager.resetAndGetPaddle();
         addEventListeners();
-    }
-
-    private void resetBalls() {
-        myBalls = new ArrayList<>();
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
-        Ball ball = new Ball(image, 100, 350, 60, -65);
-        myBalls.add(ball);
-    }
-
-    private void resetPaddle() {
-        myPaddle = new Paddle(SIZE - SIZE / 2 - Paddle.DEFAULT_WIDTH / 2, SIZE - Paddle.HEIGHT - 2);
-
-    }
-
-    private void addAllChildrenToRoot() {
-        Group currentRoot = mySceneManager.getCurrentRoot();
-        for (Block block : myBlocks) {
-            currentRoot.getChildren().add(block.getImageView());
-        }
-
-        currentRoot.getChildren().add(myPaddle.getRect());
-
-        for (Ball ball : myBalls) {
-            currentRoot.getChildren().add(ball.getImageView());
-        }
     }
 
     private void addEventListeners() {

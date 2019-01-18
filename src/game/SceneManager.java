@@ -2,7 +2,10 @@ package game;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Paint;
+import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 
 import java.util.ArrayList;
 
@@ -38,17 +41,17 @@ public class SceneManager {
 
         myScenes = new Scene[levels.length + 2];
         mySceneRoots = new Group[levels.length + 2];
-        addSplashSceneAndRoot();
-        addCustomizationSceneAndRoot();
+        constructSplashSceneAndRoot();
+        constructCustomSceneAndRoot();
         addLevelScenesAndRoots();
     }
 
-    private void addCustomizationSceneAndRoot() {
+    private void constructCustomSceneAndRoot() {
         makeNewRootAndSceneAtIndex(0);
         //FIX setup customization
     }
 
-    private void addSplashSceneAndRoot() {
+    private void constructSplashSceneAndRoot() {
         makeNewRootAndSceneAtIndex(1);
         //FIX setup splash
     }
@@ -69,13 +72,45 @@ public class SceneManager {
     }
 
     /**
-     * Call from the splash screen or after completing a level
+     * Call from the splash screen or after completing a level.
      * @return next level's blocks
      */
-    public ArrayList<Block> getCurrentLevelBlocks() {
+    public ArrayList<Block> getNewLevelBlocks() {
         myCurrentNumScene += 1;
         Level nextLevel = myLevels[myCurrentNumScene];
-        return nextLevel.initialize(mySceneWidth, mySceneHeight);
+        ArrayList<Block> list = nextLevel.initialize(mySceneWidth, mySceneHeight);
+        for (Block block : list) {
+            addNodeToRoot(block.getImageView());
+        }
+        return list;
+    }
+
+    /**
+     * Call to initialize scene or restart after lost life.
+     * @return list of one Ball
+     */
+    public ArrayList<Ball> resetAndGetBalls() {
+        ArrayList<Ball> list = new ArrayList<>();
+        Image image = new Image(getClass().getClassLoader().getResourceAsStream(Ball.IMAGE_NAME));
+        Ball ball = new Ball(image, 100, 350, 60, -65);
+        list.add(ball);
+        addNodeToRoot(ball.getImageView());
+        return list;
+    }
+
+    /**
+     * Call to initialize scene or restart after lost life.
+     * @return Paddle
+     */
+    public Paddle resetAndGetPaddle() {
+        Paddle paddle = new Paddle(mySceneWidth - mySceneWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
+                                   mySceneHeight - Paddle.HEIGHT - 2);
+        addNodeToRoot(paddle.getRect());
+        return paddle;
+    }
+
+    private void addNodeToRoot(Node imageView) {
+        mySceneRoots[myCurrentNumScene].getChildren().add(imageView);
     }
 
     /**
