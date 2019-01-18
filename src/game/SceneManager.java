@@ -2,28 +2,33 @@ package game;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
+import javafx.scene.paint.Paint;
 
 import java.util.ArrayList;
 
 
 /**
- * Constructs, stores, and manages all scenes needed for a Block Breaker game.
+ * Constructs and stores all scenes needed for a Block Breaker game.
+ * Sets up splash and customization scene to be managed autonomously.
  * @author Hunter Gregory
  */
 public class SceneManager {
+    public static final int CUSTOMIZATION = 0;
+    public static final int SPLASH = 1;
 
-    private Scene splashScene;
-    private Scene customizationScene;
+    private Paint myBackgroundColor;
     private int mySceneWidth;
     private int mySceneHeight;
     private Level[] myLevels;
-    private Scene[] myLevelScenes;
-    private Group[] myLevelRoots;
+    private Scene[] myScenes;
+    private Group[] mySceneRoots;
     private int myCurrentNumScene;
 
     /**
-     * Levels must be in this order: Customization, Splash, LevelOne, LevelTwo, ...
+     * Creates a SceneManager from an ordered array of levels
      * @param levels
+     * @param width of all scenes
+     * @param height of all scenes
      */
     public SceneManager(Level[] levels, int width, int height) {
         myLevels = levels;
@@ -31,20 +36,46 @@ public class SceneManager {
         mySceneWidth = width;
         mySceneHeight = height;
 
-        myLevelScenes = new Scene[levels.length];
-        myLevelRoots = new Group[levels.length];
-        setupScenes();
+        myScenes = new Scene[levels.length + 2];
+        mySceneRoots = new Group[levels.length + 2];
+        addSplashSceneAndRoot();
+        addCustomizationSceneAndRoot();
+        addLevelScenesAndRoots();
+    }
+
+    private void addCustomizationSceneAndRoot() {
+        makeNewRootAndSceneAtIndex(0);
+        //FIX setup customization
+    }
+
+    private void addSplashSceneAndRoot() {
+        makeNewRootAndSceneAtIndex(1);
+        //FIX setup splash
+    }
+
+    private void addLevelScenesAndRoots() {
+        for (int num = 2; num< myScenes.length; num++) {
+            makeNewRootAndSceneAtIndex(num);
+        }
+    }
+
+    private void makeNewRootAndSceneAtIndex(int k) {
+        mySceneRoots[k] = new Group();
+        myScenes[k] = new Scene(mySceneRoots[k], mySceneWidth, mySceneHeight, myBackgroundColor);
+    }
+
+    private void updateSceneColor(int index) {
+        myScenes[index].setFill(myBackgroundColor);
     }
 
     /**
      * Call from the splash screen or after completing a level
      * @return next level's blocks
      */
-    public ArrayList<Block> getNextLevelBlocks() {
+    public ArrayList<Block> getCurrentLevelBlocks() {
         myCurrentNumScene += 1;
         Level nextLevel = myLevels[myCurrentNumScene];
         return nextLevel.initialize(mySceneWidth, mySceneHeight);
-    }
     }
 
     /**
@@ -52,32 +83,27 @@ public class SceneManager {
      * @return splash screen Scene
      */
     public Scene getSplashScreen() {
-        return splashScene;
+        return myScenes[SPLASH];
     }
 
-    private Scene getCustomization() {
-        return customizationScene;
-    }
-
-    private Scene setupScenes() {
-        for (int num = 0; num< myLevelScenes.length; num++) {
-            myLevelRoots[num] = new Group();
-            myLevelScenes[num] = new Scene(myLevelRoots[num], mySceneWidth, mySceneHeight, backgroundColor);
-        }
+    private Scene getCustomizationScene() {
+        return myScenes[CUSTOMIZATION];
     }
 
     /**
-     * @return the current scene's height
+     * @return current scene
      */
-    public double getSceneHeight() { return myLevelScenes[myCurrentNumScene].getHeight(); }
+    public Scene getCurrentScene() { return myScenes[myCurrentNumScene]; }
 
     /**
-     * @return the current scene's width
+     * @return root of current scene
      */
-    public double getSceneWidth() { return myLevelScenes[myCurrentNumScene].getHeight(); }
+    public Group getCurrentRoot() { return mySceneRoots[myCurrentNumScene]; }
 
     /**
-     * @return current root of level
+     * @return true if current scene is a level
      */
-    public Group getCurrentRoot() { return myLevelRoots[myCurrentNumScene]; }
+    public boolean currentSceneIsLevel() {
+        return myCurrentNumScene != SPLASH && myCurrentNumScene != CUSTOMIZATION;
+    }
 }

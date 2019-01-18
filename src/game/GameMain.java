@@ -47,6 +47,7 @@ public class GameMain extends Application {
     public void start (Stage stage) {
         myStage = stage;
         mySceneManager = new SceneManager(LEVELS, SIZE, SIZE);
+        addLevelComponents();
         myStage.setScene(mySceneManager.getSplashScreen());
         myStage.setTitle(TITLE);
         myStage.show();
@@ -59,8 +60,8 @@ public class GameMain extends Application {
         animation.play();
     }
 
-    private void getNextLevel() {
-        myBlocks = mySceneManager.getNextLevelBlocks();
+    private void addLevelComponents() {
+        myBlocks = mySceneManager.getCurrentLevelBlocks();
         resetBallAndPaddle();
         addAllChildrenTo();
     }
@@ -107,12 +108,12 @@ public class GameMain extends Application {
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
             double ballWidth = ball.getBoundsInParent().getWidth();
-            double sceneWidth = mySceneManager.getSceneWidth();
+            double sceneWidth = mySceneManager.getCurrentScene().getWidth();
             if (ball.getX() <= 0 || ball.getX() + ballWidth >= sceneWidth)
                 ball.setVelX(ball.getVelX() * -1);
 
             double ballHeight = ball.getBoundsInParent().getHeight();
-            double sceneHeight = mySceneManager.getSceneHeight();
+            double sceneHeight = mySceneManager.getCurrentScene().getHeight();
             if (ball.getY() <= 0 || ball.getY() + ballHeight >= sceneHeight)
                 ball.setVelY(ball.getVelY() * -1);
         }
