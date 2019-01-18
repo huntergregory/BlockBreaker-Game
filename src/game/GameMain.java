@@ -65,12 +65,15 @@ public class GameMain extends Application {
     public void start (Stage stage) {
         myStage = stage;
         mySceneManager = new SceneManager(LEVELS, SIZE, SIZE);
-        addLevelComponents();
-        myStage.setScene(mySceneManager.getSplashScreen());
+        addLevelComponents(); // FIX to enable splash
+        myStage.setScene(mySceneManager.getSplashScreen()); // FIX
         myStage.setTitle(TITLE);
         myStage.show();
 
-        // attach "game loop" to timeline to play it
+        attachGameLoopAndPlay();
+    }
+
+    private void attachGameLoopAndPlay() {
         var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
         var animation = new Timeline();
         animation.setCycleCount(Timeline.INDEFINITE);
@@ -114,15 +117,15 @@ public class GameMain extends Application {
     private void handleMouseClick() {
         if (myGameIsOver)
             return;
+
         myGameIsPaused = !myGameIsPaused;
-        ObservableList<Node> rootChildren = mySceneManager.getCurrentRoot().getChildren();
         if (myGameIsPaused) {
-            rootChildren.add(PAUSE_RECT_1);
-            rootChildren.add(PAUSE_RECT_2);
+            mySceneManager.addNodeToRoot(PAUSE_RECT_1);
+            mySceneManager.addNodeToRoot(PAUSE_RECT_2);
         }
         else {
-            rootChildren.remove(PAUSE_RECT_1);
-            rootChildren.remove(PAUSE_RECT_2);
+            mySceneManager.removeNodeFromRoot(PAUSE_RECT_1);
+            mySceneManager.removeNodeFromRoot(PAUSE_RECT_2);
         }
     }
 
@@ -145,12 +148,10 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            double sceneHeight = mySceneManager.getCurrentScene().getHeight();
-            if (ball.getY() <= 0 || ball.getY() + ball.HEIGHT >= sceneHeight)
+            if (ball.getY() <= 0 || ball.getY() + ball.HEIGHT >= mySceneManager.getCurrentScene().getHeight())
                 ball.multiplyVelY(-1);
 
-                double sceneWidth = mySceneManager.getCurrentScene().getWidth();
-            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= sceneWidth)
+            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= mySceneManager.getCurrentScene().getWidth())
                 ball.multiplyVelX(-1);
         }
     }
@@ -184,7 +185,7 @@ public class GameMain extends Application {
                 if (block.getImageView().getBoundsInParent().intersects(ball.getImageView().getBoundsInParent())) {
                     reflectBallOffBlock(ball, block);
                     deleteBlockIfNecessary(block);
-                    break; // out of block loop //FIX?
+                    break;
                 }
             }
         }
@@ -205,7 +206,7 @@ public class GameMain extends Application {
     private void deleteBlockIfNecessary(Block block) {
         boolean blockIsDestroyed = block.updateOnCollision();
         if (blockIsDestroyed) {
-            mySceneManager.getCurrentRoot().getChildren().remove(block.getImageView());
+            mySceneManager.removeNodeFromRoot(block.getImageView());
             myBlocks.remove(block);
         }
     }
@@ -228,7 +229,7 @@ public class GameMain extends Application {
     }
 
     private void deleteBall(Ball ball) {
-        mySceneManager.getCurrentRoot().getChildren().remove(ball.getImageView());
+        mySceneManager.removeNodeFromRoot(ball.getImageView());
         myBalls.remove(ball);
     }
 

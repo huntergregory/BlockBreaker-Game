@@ -1,5 +1,6 @@
 package game;
 
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
@@ -109,9 +110,23 @@ public class SceneManager {
         return paddle;
     }
 
-    private void addNodeToRoot(Node imageView) {
-        mySceneRoots[myCurrentNumScene].getChildren().add(imageView);
+    /**
+     * Add a node to the children of the current scene's root
+     * @param node
+     */
+    public void addNodeToRoot(Node node) {
+        getCurrentRootChildren().add(node);
     }
+
+    /**
+     * Remove a node from the children of the current scene's root
+     * @param node
+     */
+    public void removeNodeFromRoot(Node node) {
+        getCurrentRootChildren().add(node);
+    }
+
+    private ObservableList<Node> getCurrentRootChildren() { return mySceneRoots[myCurrentNumScene].getChildren(); }
 
     /**
      * Use to return to the splash screen after the game is over or the player has won
@@ -129,11 +144,6 @@ public class SceneManager {
      * @return current scene
      */
     public Scene getCurrentScene() { return myScenes[myCurrentNumScene]; }
-
-    /**
-     * @return root of current scene
-     */
-    public Group getCurrentRoot() { return mySceneRoots[myCurrentNumScene]; }
 
     /**
      * @return true if current scene is a level
