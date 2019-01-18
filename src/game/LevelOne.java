@@ -14,9 +14,9 @@ import java.util.ArrayList;
  * @author Hunter Gregory
  */
 public class LevelOne implements Level {
-    private final int DISTANCE_FROM_SIDES = 1;  // in BLOCK-WIDTH units
-    private final int DISTANCE_FROM_TOP = 3;    // in BLOCK_HEIGHT units
-    private final int DISTANCE_FROM_BOTTOM = 10; // in BLOCK_HEIGHT units
+    private final int DISTANCE_FROM_SIDES = 1;  // in Block.WIDTH units
+    private final int DISTANCE_FROM_TOP = 3;    // in Block.HEIGHT units
+    private final int DISTANCE_FROM_BOTTOM = 10; // in Block.HEIGHT units
 
     private ArrayList<Block> configuration;
     private int numRows;
@@ -25,8 +25,8 @@ public class LevelOne implements Level {
     @Override
     public ArrayList<Block> initialize(double sceneWidth, double sceneHeight) {
         configuration = new ArrayList<>();
-        numCols = getNumColumns(sceneWidth); // c * BLOCK_WIDTH + (c-1) * SEPARATION_DISTANCE >= 4 * BLOCK_WIDTH
-        numRows = getNumRows(sceneHeight); // r * BLOCK_HEIGHT + (r-1) * SEPARATION_DISTANCE >= 7 * BLOCK_HEIGHT
+        numCols = getNumColumns(sceneWidth);
+        numRows = getNumRows(sceneHeight);
         double xStart = getXStart(sceneWidth);
         double yStart = getYStart(sceneHeight);
         System.out.println("columns: " + numCols + "\nrows: " + numRows + "\nStart: (" + xStart + ", " + yStart + ")");
@@ -35,31 +35,31 @@ public class LevelOne implements Level {
     }
 
     //based on the equation:
-    // c * BLOCK_WIDTH + (c-1) * SEPARATION_DISTANCE <= sceneWidth - (2 * DISTANCE_FROM_SIDES) * BLOCK_WIDTH
+    // c * Block.WIDTH + (c-1) * SEPARATION_DISTANCE <= sceneWidth - (2 * DISTANCE_FROM_SIDES) * Block.WIDTH
     private int getNumColumns(double sceneWidth) {
-        double numCols = (sceneWidth - (DISTANCE_FROM_SIDES * 2) * BLOCK_WIDTH + SEPARATION_DISTANCE) /
-                (BLOCK_WIDTH + SEPARATION_DISTANCE);
+        double numCols = (sceneWidth - (DISTANCE_FROM_SIDES * 2) * Block.WIDTH + SEPARATION_DISTANCE) /
+                (Block.WIDTH + SEPARATION_DISTANCE);
         return (int) Math.floor(numCols);
     }
 
     //based on the equation:
-    // r * BLOCK_HEIGHT + (r-1) * SEPARATION_DISTANCE <= sceneHeight - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * BLOCK_HEIGHT
+    // r * Block.Height + (r-1) * SEPARATION_DISTANCE <= sceneHeight - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.Height
     private int getNumRows(double sceneWidth) {
-        double numRows = (sceneWidth - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * BLOCK_HEIGHT + SEPARATION_DISTANCE) /
-        (BLOCK_HEIGHT + SEPARATION_DISTANCE);
+        double numRows = (sceneWidth - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT + SEPARATION_DISTANCE) /
+        (Block.HEIGHT + SEPARATION_DISTANCE);
         return (int) Math.floor(numRows);
     }
 
     private double getXStart(double sceneWidth) {
-        double extraSpace = sceneWidth - numCols * BLOCK_WIDTH - (numCols - 1) * SEPARATION_DISTANCE -
-                (2 * DISTANCE_FROM_SIDES) * BLOCK_WIDTH;
-        return extraSpace / 2 + BLOCK_WIDTH * DISTANCE_FROM_SIDES;
+        double extraSpace = sceneWidth - numCols * Block.WIDTH - (numCols - 1) * SEPARATION_DISTANCE -
+                (2 * DISTANCE_FROM_SIDES) * Block.WIDTH;
+        return extraSpace / 2 + Block.WIDTH * DISTANCE_FROM_SIDES;
     }
 
     private double getYStart(double sceneHeight) {
-        double extraSpace = sceneHeight - numRows * BLOCK_HEIGHT - (numRows - 1) * SEPARATION_DISTANCE -
-                (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * BLOCK_HEIGHT;
-        return extraSpace / 2 + BLOCK_HEIGHT * DISTANCE_FROM_TOP;
+        double extraSpace = sceneHeight - numRows * Block.HEIGHT - (numRows - 1) * SEPARATION_DISTANCE -
+                (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT;
+        return extraSpace / 2 + Block.HEIGHT * DISTANCE_FROM_TOP;
     }
 
     private void updateConfiguration(double xStart, double yStart) {
@@ -69,17 +69,17 @@ public class LevelOne implements Level {
         for (int r=0; r<numRows; r++) {
             for (int c=0; c<numCols; c++) {
                 if (isAlphaBlockLocation(r,c)) {
-                    appendBlock(xCurrent, yCurrent, Block.BLOCK_TYPE.ALPHA);
+                    appendBlock(xCurrent, yCurrent, BlockType.ALPHA);
                 }
                 else if (isBetaBlockLocation(r,c)) {
-                    appendBlock(xCurrent, yCurrent, Block.BLOCK_TYPE.BETA);
+                    appendBlock(xCurrent, yCurrent, BlockType.BETA);
                 }
                 else {
-                    appendBlock(xCurrent, yCurrent, Block.BLOCK_TYPE.GAMMA);
+                    appendBlock(xCurrent, yCurrent, BlockType.GAMMA);
                 }
-                xCurrent += BLOCK_WIDTH + SEPARATION_DISTANCE;
+                xCurrent += Block.WIDTH + SEPARATION_DISTANCE;
             }
-            yCurrent += BLOCK_HEIGHT + SEPARATION_DISTANCE;
+            yCurrent += Block.HEIGHT + SEPARATION_DISTANCE;
             xCurrent = xStart;
         }
     }
@@ -95,12 +95,12 @@ public class LevelOne implements Level {
         return row == 1 || row == numRows - 2 || col == 1 || col == numCols - 2;
     }
 
-    private void appendBlock(double xCurrent, double yCurrent, Block.BLOCK_TYPE type) {
+    private void appendBlock(double xCurrent, double yCurrent, BlockType type) {
         Block block = new Block(type);
         block.setPosition(xCurrent, yCurrent);
-        block.setPreserveRatio(false);
-        block.setFitHeight(BLOCK_HEIGHT);
-        block.setFitWidth(BLOCK_WIDTH);
+        block.getImageView().setPreserveRatio(false);
+        block.getImageView().setFitHeight(Block.HEIGHT);
+        block.getImageView().setFitWidth(Block.WIDTH);
         configuration.add(block);
     }
 

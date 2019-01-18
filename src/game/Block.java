@@ -9,72 +9,34 @@ import javafx.scene.image.Image;
  * block type upon a call to the updateOnCollision() method.
  * @author Hunter Gregory
  */
-public class Block extends ImageView {
-    private final static int INDESTRUCTIBLE = -1;
+public class Block {
+    public final static int INDESTRUCTIBLE = -1;
+    public static final int WIDTH = 45;
+    public static final int HEIGHT = 15;
+
+    private BlockType myType;
+    private ImageView myImageView;
 
     /**
-     * Contains all predefined properties of all block types.
-     * Properties are remainingHits until block is destroyed (-1 for indestructible blocks),
-     * reflectionMultiplier (value used to increase, decrease, or maintain ball's velocity after
-     * reflecting off the block), and the fillColor of the block.
-     */
-    protected enum BLOCK_TYPE {
-        ALPHA(1, 1, "brick6.gif"), // block with 1 hit remaining
-        BETA(2, 1, "brick7.gif"),  // block with 2 hits remaining
-        GAMMA(3, 1, "brick8.gif"), // block with 3 hits remaining
-        METAL(INDESTRUCTIBLE, 1, "brick3.gif"), // normal indestructible block
-        SAND(INDESTRUCTIBLE, 0.5, "brick5.gif"), // indestructible, velocity-dampening block
-        TRAMPOLINE(INDESTRUCTIBLE, 1.5, "brick4.gif"); // indestructible, velocity-increasing block
-
-        private int remainingHits;
-        private double reflectionMultiplier;
-        private String image;
-
-        //internal constructor
-        BLOCK_TYPE(int remainingHits, double reflectionMultiplier, String image) {
-            this.remainingHits = remainingHits;
-            this.reflectionMultiplier = reflectionMultiplier;
-            this.image = image;
-        }
-
-        /**
-         * @return remaining hits for block
-         */
-        public int getHitsRemaining() { return remainingHits; }
-
-        /**
-         * @return block's reflection multiplier
-         */
-        public double getMultiplier() { return reflectionMultiplier; }
-
-        /**
-         * @return block's image
-         */
-        public String getImage() { return image; }
-    }
-
-    private BLOCK_TYPE myType;
-
-    /**
-     * Create an alpha block
+     * Default constructor creates an alpha block
      */
     public Block() {
-        this(BLOCK_TYPE.ALPHA);
+        this(BlockType.ALPHA);
     }
 
     /**
      * Create a game.Block with specified type and unspecified rectangle dimensions and position
      * @param type of block
      */
-    public Block(BLOCK_TYPE type) {
-        super();
+    public Block(BlockType type) {
         myType = type;
+        myImageView = new ImageView();
         updateBlockImage();
     }
 
     private void updateBlockImage() {
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream(myType.getImage()));
-        this.setImage(image);
+        Image image = new Image(getClass().getClassLoader().getResourceAsStream(myType.getImageName()));
+        myImageView.setImage(image);
     }
 
     /**
@@ -82,7 +44,7 @@ public class Block extends ImageView {
      * @return true if block should be destroyed after collision, false otherwise
      */
     public boolean updateOnCollision() {
-        BLOCK_TYPE nextType = getNextType();
+        BlockType nextType = getNextType();
         if (nextType == null) {
             return true;
         }
@@ -94,11 +56,11 @@ public class Block extends ImageView {
     //returns null if the current object is an alpha block
     //and returns myType if the current block is indestructible
     //FIX comments when considering super ball powerup
-    private BLOCK_TYPE getNextType() {
-        BLOCK_TYPE nextType = null;
+    private BlockType getNextType() {
+        BlockType nextType = null;
         int currentHits = myType.getHitsRemaining();
         if (currentHits != INDESTRUCTIBLE) {
-            for (BLOCK_TYPE type : BLOCK_TYPE.values()) {
+            for (BlockType type : BlockType.values()) {
                 if (type.getHitsRemaining() == currentHits - 1) {
                     nextType = type;
                     break;
@@ -107,6 +69,11 @@ public class Block extends ImageView {
         }
         return nextType;
     }
+
+    /**
+     * @return ImageView representing the block
+     */
+    public ImageView getImageView() { return myImageView; }
 
     /**
      * @return block's reflection multiplier
@@ -119,7 +86,21 @@ public class Block extends ImageView {
      * @param y
      */
     public void setPosition(double x, double y) {
-        this.setX(x);
-        this.setY(y);
+        myImageView.setX(x);
+        myImageView.setY(y);
+    }
+
+    /**
+     * @return x position of block's ImageView
+     */
+    public double getX() {
+        return myImageView.getX();
+    }
+
+    /**
+     * @return y position of block's ImageView
+     */
+    public double getY() {
+        return myImageView.getY();
     }
 }

@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -70,7 +71,7 @@ public class GameMain extends Application {
         //Erase all old balls and create new one
         myBalls = new ArrayList<>();
         Image image = new Image(getClass().getClassLoader().getResourceAsStream(BALL_IMAGE));
-        Ball ball = new Ball(image, 60,-60); // FIX
+        Ball ball = new Ball(image, 0,0); // FIX
         ball.setX(100);                                  // FIX
         ball.setY(350);                                  // FIX
         myBalls.add(ball);
@@ -82,13 +83,13 @@ public class GameMain extends Application {
     private void addAllChildrenTo() {
         Group currentRoot = mySceneManager.getCurrentRoot();
         for (Block block : myBlocks) {
-            currentRoot.getChildren().add(block);
+            currentRoot.getChildren().add(block.getImageView());
         }
 
         //currentRoot.getChildren().add(myPaddle); //FIX
 
         for (Ball ball : myBalls) {
-            currentRoot.getChildren().add(ball);
+            currentRoot.getChildren().add(ball.getImageView());
         }
     }
 
@@ -107,23 +108,20 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            double ballWidth = ball.getBoundsInParent().getWidth();
             double sceneWidth = mySceneManager.getCurrentScene().getWidth();
-            if (ball.getX() <= 0 || ball.getX() + ballWidth >= sceneWidth)
+            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= sceneWidth)
                 ball.setVelX(ball.getVelX() * -1);
 
-            double ballHeight = ball.getBoundsInParent().getHeight();
             double sceneHeight = mySceneManager.getCurrentScene().getHeight();
-            if (ball.getY() <= 0 || ball.getY() + ballHeight >= sceneHeight)
+            if (ball.getY() <= 0 || ball.getY() + ball.HEIGHT >= sceneHeight)
                 ball.setVelY(ball.getVelY() * -1);
         }
     }
 
-    //BALL IS BOUNCING OFF OF DEAD BLOCKS
     private void updateAllOnBlockCollision() {
         for (Ball ball : myBalls) {
             for (Block block : myBlocks) {
-                if (block.getBoundsInParent().intersects(ball.getBoundsInParent())) {
+                if (block.getImageView().getBoundsInParent().intersects(ball.getImageView().getBoundsInParent())) {
                     reflectBallOffBlock(ball, block);
                     deleteBlockIfNecessary(block);
                     break; // out of block loop //FIX?
@@ -147,15 +145,14 @@ public class GameMain extends Application {
     }
 
     private boolean isVerticalCollision(Ball ball, Block block) {
-        double ballCenterX = ball.getX() + ball.getBoundsInParent().getWidth() / 2;
-        double blockWidth = block.getBoundsInParent().getWidth();
-        return block.getX() < ballCenterX && ballCenterX < block.getX() + blockWidth;
+        double ballCenterX = ball.getX() + ball.WIDTH / 2;
+        return block.getX() < ballCenterX && ballCenterX < block.getX() + block.WIDTH;
     }
 
     private void deleteBlockIfNecessary(Block block) {
         boolean blockIsDestroyed = block.updateOnCollision();
         if (blockIsDestroyed) {
-            mySceneManager.getCurrentRoot().getChildren().remove(block);
+            mySceneManager.getCurrentRoot().getChildren().remove(block.getImageView());
             myBlocks.remove(block);
         }
     }

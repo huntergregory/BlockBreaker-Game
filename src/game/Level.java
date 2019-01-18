@@ -7,9 +7,7 @@ import java.util.ArrayList;
  * @author Hunter Gregory
  */
 public interface Level {
-    final double BLOCK_WIDTH = 45;
-    final double BLOCK_HEIGHT = 15;
-    final double SEPARATION_DISTANCE = 5;
+    double SEPARATION_DISTANCE = 5;
 
     /**
      * Initialize the level
