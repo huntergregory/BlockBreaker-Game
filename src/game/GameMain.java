@@ -30,7 +30,8 @@ import java.util.ArrayList;
  */
 public class GameMain extends Application {
     public static final String TITLE = "BlockBreaker";
-    public static final int SIZE = 400;
+    public static final int SIZE_HEIGHT = 500;
+    public static final int SIZE_WIDTH = 400;
     public static final int FRAMES_PER_SECOND = 300; // less paddle lag at this number
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
@@ -39,11 +40,11 @@ public class GameMain extends Application {
     public static final Level[] LEVELS = { new LevelOne(), new LevelOne() };
     public static final int PAUSE_RECT_WIDTH = 30;
     public static final int PAUSE_RECT_HEIGHT = 80;
-    public static final Rectangle PAUSE_RECT_1 = new Rectangle(SIZE / 2 - 3 * PAUSE_RECT_WIDTH / 2,
-                                                            SIZE / 2 - PAUSE_RECT_HEIGHT,
+    public static final Rectangle PAUSE_RECT_1 = new Rectangle(SIZE_WIDTH / 2 - 3 * PAUSE_RECT_WIDTH / 2,
+                                                            SIZE_HEIGHT / 2 - PAUSE_RECT_HEIGHT,
                                                                 PAUSE_RECT_WIDTH, PAUSE_RECT_HEIGHT);
-    public static final Rectangle PAUSE_RECT_2 = new Rectangle(SIZE / 2 + PAUSE_RECT_WIDTH / 2,
-                                                            SIZE / 2 - PAUSE_RECT_HEIGHT,
+    public static final Rectangle PAUSE_RECT_2 = new Rectangle(SIZE_WIDTH / 2 + PAUSE_RECT_WIDTH / 2,
+                                                            SIZE_HEIGHT / 2 - PAUSE_RECT_HEIGHT,
                                                                 PAUSE_RECT_WIDTH, PAUSE_RECT_HEIGHT);
 
 
@@ -64,7 +65,7 @@ public class GameMain extends Application {
     @Override
     public void start (Stage stage) {
         myStage = stage;
-        mySceneManager = new SceneManager(LEVELS, SIZE, SIZE);
+        mySceneManager = new SceneManager(LEVELS, SIZE_WIDTH, SIZE_HEIGHT);
         addLevelComponents(); // FIX to enable splash
         myStage.setScene(mySceneManager.getSplashScreen()); // FIX
         myStage.setTitle(TITLE);
@@ -102,7 +103,7 @@ public class GameMain extends Application {
     private void handleMovingPaddle(KeyCode code) {
         if (myGameIsOver)
             return;
-        if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE) {
+        if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH) {
             myPaddle.setX(myPaddle.getX() + PADDLE_SPEED); //currently overshoots boundary a little due to large PADDLE_SPEED
         }
         else if (code == KeyCode.LEFT && myPaddle.getX() > 0) {
@@ -148,17 +149,17 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            if (ball.getY() <= 0 || ball.getY() + ball.HEIGHT >= mySceneManager.getCurrentScene().getHeight())
+            if (ball.getY() <= 0 || ball.getY() + ball.getHeight() >= mySceneManager.getCurrentScene().getHeight())
                 ball.multiplyVelY(-1);
 
-            if (ball.getX() <= 0 || ball.getX() + ball.WIDTH >= mySceneManager.getCurrentScene().getWidth())
+            if (ball.getX() <= 0 || ball.getX() + ball.getWidth() >= mySceneManager.getCurrentScene().getWidth())
                 ball.multiplyVelX(-1);
         }
     }
 
     private void updateBallsOnPaddleCollision() {
         for (Ball ball : myBalls) {
-            if (myPaddle.getRect().getBoundsInParent().intersects(ball.getImageView().getBoundsInParent())) {
+            if (myPaddle.getParentBounds().intersects(ball.getParentBounds())) {
                 //FIX consider the holding the ball powerup
                 reflectBallOffPaddle(ball);
             }
@@ -182,7 +183,7 @@ public class GameMain extends Application {
     private void updateAllOnBlockCollision() {
         for (Ball ball : myBalls) {
             for (Block block : myBlocks) {
-                if (block.getImageView().getBoundsInParent().intersects(ball.getImageView().getBoundsInParent())) {
+                if (block.getParentBounds().intersects(ball.getParentBounds())) {
                     reflectBallOffBlock(ball, block);
                     deleteBlockIfNecessary(block);
                     break;

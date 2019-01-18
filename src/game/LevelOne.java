@@ -16,22 +16,25 @@ import java.util.ArrayList;
 public class LevelOne implements Level {
     private final int DISTANCE_FROM_SIDES = 1;  // in Block.WIDTH units
     private final int DISTANCE_FROM_TOP = 3;    // in Block.HEIGHT units
-    private final int DISTANCE_FROM_BOTTOM = 10; // in Block.HEIGHT units
+    private final int DISTANCE_FROM_BOTTOM = 15; // in Block.HEIGHT units
 
-    private ArrayList<Block> configuration;
-    private int numRows;
-    private int numCols;
+    private ArrayList<Block> myConfiguration;
+    private int myNumRows;
+    private int myNumCols;
 
     @Override
     public ArrayList<Block> initialize(double sceneWidth, double sceneHeight) {
-        configuration = new ArrayList<>();
-        numCols = getNumColumns(sceneWidth);
-        numRows = getNumRows(sceneHeight);
+        myConfiguration = new ArrayList<>();
+        myNumCols = getNumColumns(sceneWidth);
+        myNumRows = getNumRows(sceneHeight);
         double xStart = getXStart(sceneWidth);
         double yStart = getYStart(sceneHeight);
-        System.out.println("columns: " + numCols + "\nrows: " + numRows + "\nStart: (" + xStart + ", " + yStart + ")");
+        System.out.println("columns: " + myNumCols + "\nrows: " + myNumRows + "\nStart: (" + xStart + ", " + yStart + ")");
         updateConfiguration(xStart, yStart);
-        return configuration;
+        for (Block b : myConfiguration) {
+            System.out.printf("Block at: (%.1f, %.1f)\n", b.getX(), b.getY());
+        }
+        return myConfiguration;
     }
 
     //based on the equation:
@@ -51,13 +54,13 @@ public class LevelOne implements Level {
     }
 
     private double getXStart(double sceneWidth) {
-        double extraSpace = sceneWidth - numCols * Block.WIDTH - (numCols - 1) * SEPARATION_DISTANCE -
+        double extraSpace = sceneWidth - myNumCols * Block.WIDTH - (myNumCols - 1) * SEPARATION_DISTANCE -
                 (2 * DISTANCE_FROM_SIDES) * Block.WIDTH;
         return extraSpace / 2 + Block.WIDTH * DISTANCE_FROM_SIDES;
     }
 
     private double getYStart(double sceneHeight) {
-        double extraSpace = sceneHeight - numRows * Block.HEIGHT - (numRows - 1) * SEPARATION_DISTANCE -
+        double extraSpace = sceneHeight - myNumRows * Block.HEIGHT - (myNumRows - 1) * SEPARATION_DISTANCE -
                 (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT;
         return extraSpace / 2 + Block.HEIGHT * DISTANCE_FROM_TOP;
     }
@@ -66,8 +69,8 @@ public class LevelOne implements Level {
         double xCurrent = xStart;
         double yCurrent = yStart;
 
-        for (int r=0; r<numRows; r++) {
-            for (int c=0; c<numCols; c++) {
+        for (int r = 0; r< myNumRows; r++) {
+            for (int c = 0; c< myNumCols; c++) {
                 if (isAlphaBlockLocation(r,c)) {
                     appendBlock(xCurrent, yCurrent, BlockType.ALPHA);
                 }
@@ -84,24 +87,22 @@ public class LevelOne implements Level {
         }
     }
 
-    //assuming numRows, numCols >= 1
+    //assuming myNumRows, myNumCols >= 1
     private boolean isAlphaBlockLocation(int row, int col) {
-        return row == 0 || row == numRows - 1 || col == 0 || col == numCols - 1;
+        return row == 0 || row == myNumRows - 1 || col == 0 || col == myNumCols - 1;
     }
 
     //assuming that this is called after isAlphaBlockLocation()
-    //assuming numRows, numCols >= 2
+    //assuming myNumRows, myNumCols >= 2
     private boolean isBetaBlockLocation(int row, int col) {
-        return row == 1 || row == numRows - 2 || col == 1 || col == numCols - 2;
+        return row == 1 || row == myNumRows - 2 || col == 1 || col == myNumCols - 2;
     }
 
     private void appendBlock(double xCurrent, double yCurrent, BlockType type) {
         Block block = new Block(type);
-        block.setPosition(xCurrent, yCurrent);
-        block.getImageView().setPreserveRatio(false);
-        block.getImageView().setFitHeight(Block.HEIGHT);
-        block.getImageView().setFitWidth(Block.WIDTH);
-        configuration.add(block);
+        block.setX(xCurrent);
+        block.setY(yCurrent);
+        myConfiguration.add(block);
     }
 
 

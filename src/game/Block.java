@@ -9,13 +9,12 @@ import javafx.scene.image.Image;
  * block type upon a call to the updateOnCollision() method.
  * @author Hunter Gregory
  */
-public class Block {
+public class Block extends GameObject {
     public final static int INDESTRUCTIBLE = -1;
     public static final int WIDTH = 45;
     public static final int HEIGHT = 15;
 
     private BlockType myType;
-    private ImageView myImageView;
 
     /**
      * Default constructor creates an alpha block
@@ -29,14 +28,8 @@ public class Block {
      * @param type of block
      */
     public Block(BlockType type) {
+        super(type.getImageName(), WIDTH, HEIGHT);
         myType = type;
-        myImageView = new ImageView();
-        updateBlockImage();
-    }
-
-    private void updateBlockImage() {
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream(myType.getImageName()));
-        myImageView.setImage(image);
     }
 
     /**
@@ -49,7 +42,7 @@ public class Block {
             return true;
         }
         myType = nextType;
-        updateBlockImage();
+        setImageFromName(myType.getImageName());
         return false;
     }
 
@@ -71,36 +64,7 @@ public class Block {
     }
 
     /**
-     * @return ImageView representing the block
-     */
-    public ImageView getImageView() { return myImageView; }
-
-    /**
      * @return block's reflection multiplier
      */
     public double getMultiplier() { return myType.getMultiplier(); }
-
-    /**
-     * Positions the Block
-     * @param x
-     * @param y
-     */
-    public void setPosition(double x, double y) {
-        myImageView.setX(x);
-        myImageView.setY(y);
-    }
-
-    /**
-     * @return x position of block's ImageView
-     */
-    public double getX() {
-        return myImageView.getX();
-    }
-
-    /**
-     * @return y position of block's ImageView
-     */
-    public double getY() {
-        return myImageView.getY();
-    }
 }

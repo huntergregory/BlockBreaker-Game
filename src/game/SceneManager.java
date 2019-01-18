@@ -92,8 +92,7 @@ public class SceneManager {
      */
     public ArrayList<Ball> resetAndGetBalls() {
         ArrayList<Ball> list = new ArrayList<>();
-        Image image = new Image(getClass().getClassLoader().getResourceAsStream(Ball.IMAGE_NAME));
-        Ball ball = new Ball(image, 100, 350, 60, -65);
+        Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
         list.add(ball);
         addNodeToRoot(ball.getImageView());
         return list;
@@ -106,7 +105,7 @@ public class SceneManager {
     public Paddle resetAndGetPaddle() {
         Paddle paddle = new Paddle(mySceneWidth - mySceneWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
                                    mySceneHeight - Paddle.HEIGHT - 2);
-        addNodeToRoot(paddle.getRect());
+        addNodeToRoot(paddle.getImageView());
         return paddle;
     }
 
@@ -123,7 +122,7 @@ public class SceneManager {
      * @param node
      */
     public void removeNodeFromRoot(Node node) {
-        getCurrentRootChildren().add(node);
+        getCurrentRootChildren().remove(node);
     }
 
     private ObservableList<Node> getCurrentRootChildren() { return mySceneRoots[myCurrentNumScene].getChildren(); }
