@@ -11,6 +11,7 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -27,12 +28,12 @@ public class GameMain extends Application {
     public static final Paint BACKGROUND = Color.AZURE; //FIX to make customizable
     public static final String BALL_IMAGE = "ball.gif"; //FIX to make customizable
     public static final int MAX_LIVES = 3;
-    private Level[] myLevels = { new LevelOne() };
+    public static final Level[] LEVELS = { new LevelOne(), new LevelOne() };
 
-    private Scene myScene;
-    private Group myRoot;
+
+    private Stage myStage;
+    private SceneManager mySceneManager;
     private int myLives = MAX_LIVES;
-    private int currentLevelNumber; // 0 based
     private ArrayList<Block> myBlocks;
     private ArrayList<Ball> myBalls;
     private Paddle myPaddle;
@@ -44,11 +45,11 @@ public class GameMain extends Application {
      */
     @Override
     public void start (Stage stage) {
-        // attach scene to the stage and display it
-        myScene = setupGame(SIZE, SIZE, BACKGROUND);
-        stage.setScene(myScene);
-        stage.setTitle(TITLE);
-        stage.show();
+        myStage = stage;
+        mySceneManager = new SceneManager(LEVELS, SIZE, SIZE);
+        myStage.setScene(mySceneManager.getSplashScreen());
+        myStage.setTitle(TITLE);
+        myStage.show();
 
         // attach "game loop" to timeline to play it
         var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
@@ -58,21 +59,10 @@ public class GameMain extends Application {
         animation.play();
     }
 
-    private Scene setupGame(int width, int height, Paint backgroundColor) {
-        myRoot = new Group();
-        myScene = new Scene(myRoot, width, height, backgroundColor);
-        currentLevelNumber = 0; //FIX??
-        createNewLevel();
+    private void getNextLevel() {
+        myBlocks = mySceneManager.getNextLevelBlocks();
         resetBallAndPaddle();
         addAllChildrenTo();
-
-        return myScene;
-    }
-
-    //assumes currentLevelNumber was incremented and that there is a next level
-    private void createNewLevel() {
-        Level nextLevel = myLevels[currentLevelNumber];
-        myBlocks = nextLevel.initialize(myScene.getWidth(), myScene.getHeight());
     }
 
     private void resetBallAndPaddle() {
@@ -89,22 +79,18 @@ public class GameMain extends Application {
     }
 
     private void addAllChildrenTo() {
+        Group currentRoot = mySceneManager.getCurrentRoot();
         for (Block block : myBlocks) {
-            myRoot.getChildren().add(block);
+            currentRoot.getChildren().add(block);
         }
 
-        //myRoot.getChildren().add(myPaddle); //FIX
+        //currentRoot.getChildren().add(myPaddle); //FIX
 
         for (Ball ball : myBalls) {
-            myRoot.getChildren().add(ball);
+            currentRoot.getChildren().add(ball);
         }
     }
 
-    // Change properties of shapes to animate them
-    /*
-    FIX THESE:
-        2. consider when ball hits block from left and right (only works now if it hits bottom or top)
-     */
     private void step (double elapsedTime) {
         moveBalls(elapsedTime);
         updateBallsOnWallCollision();
@@ -120,9 +106,14 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            if (ball.getX() <= 0 || ball.getX() + ball.getBoundsInParent().getWidth() >= myScene.getWidth())
+            double ballWidth = ball.getBoundsInParent().getWidth();
+            double sceneWidth = mySceneManager.getSceneWidth();
+            if (ball.getX() <= 0 || ball.getX() + ballWidth >= sceneWidth)
                 ball.setVelX(ball.getVelX() * -1);
-            if (ball.getY() <= 0 || ball.getY() + ball.getBoundsInParent().getHeight() >= myScene.getHeight())
+
+            double ballHeight = ball.getBoundsInParent().getHeight();
+            double sceneHeight = mySceneManager.getSceneHeight();
+            if (ball.getY() <= 0 || ball.getY() + ballHeight >= sceneHeight)
                 ball.setVelY(ball.getVelY() * -1);
         }
     }
@@ -163,7 +154,7 @@ public class GameMain extends Application {
     private void deleteBlockIfNecessary(Block block) {
         boolean blockIsDestroyed = block.updateOnCollision();
         if (blockIsDestroyed) {
-            myRoot.getChildren().remove(block);
+            mySceneManager.getCurrentRoot().getChildren().remove(block);
             myBlocks.remove(block);
         }
     }
