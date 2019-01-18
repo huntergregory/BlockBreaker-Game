@@ -6,26 +6,37 @@ import javafx.scene.shape.Rectangle;
  * @author Hunter Gregory
  */
 public class Paddle {
-    public static final int DEFAULT_WIDTH = Block.WIDTH;
-    public static final int DEFAULT_HEIGHT = Block.HEIGHT;
+    public static final int DEFAULT_WIDTH = 60;
+    public static final int HEIGHT = 10;
 
     private Rectangle myRect;
 
     /**
      * Create a game.Paddle with an empty, rounded rectangle
      */
-    public Paddle() {
+    public Paddle(int x, int y) {
         myRect = new Rectangle();
+        myRect.setX(x);
+        myRect.setY(y);
         myRect.setWidth(DEFAULT_WIDTH);
-        myRect.setHeight(DEFAULT_HEIGHT);
-        myRect.setArcWidth(20); //making paddle a rounded rectangle
-        myRect.setArcHeight(20);
+        myRect.setHeight(HEIGHT);
+        myRect.setArcWidth(10); //making paddle a rounded rectangle
+        myRect.setArcHeight(10);
+    }
+
+    public void updateRectWidth(double length) {
+        myRect.setWidth(length); //FIX animate it
     }
 
     /**
-     * @return Paddle's rectangle
+     * @return Paddle's Rectangle
      */
     public Rectangle getRect() { return myRect; }
+
+    /**
+     * @return width of Paddle's Rectangle
+     */
+    public double getWidth() { return myRect.getBoundsInParent().getWidth(); }
 
     /**
      * @return x position of Paddle's Rectangle
