@@ -36,14 +36,6 @@ public class GameMain extends Application {
     public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) };
     public static final int SPLASH_SCENE = 1;
     public static final int CUSTOM_SCENE = 0;
-    public static final int PAUSE_RECT_WIDTH = 30;
-    public static final int PAUSE_RECT_HEIGHT = 80;
-    public static final Rectangle PAUSE_RECT_1 = new Rectangle(SIZE_WIDTH / 2 - 3 * PAUSE_RECT_WIDTH / 2,
-                                                            SIZE_HEIGHT / 2 - PAUSE_RECT_HEIGHT,
-                                                                PAUSE_RECT_WIDTH, PAUSE_RECT_HEIGHT);
-    public static final Rectangle PAUSE_RECT_2 = new Rectangle(SIZE_WIDTH / 2 + PAUSE_RECT_WIDTH / 2,
-                                                            SIZE_HEIGHT / 2 - PAUSE_RECT_HEIGHT,
-                                                                PAUSE_RECT_WIDTH, PAUSE_RECT_HEIGHT);
 
 
     private Stage myStage;
@@ -53,6 +45,7 @@ public class GameMain extends Application {
     private ArrayList<Powerup> myPowerups = new ArrayList<>();
     private ArrayList<Powerup> myFallingPowerups = new ArrayList<>();
     private ArrayList<Ball> myBalls = new ArrayList<>();
+    private ArrayList<Laser> myLasers = new ArrayList<>();
     private Paddle myPaddle;
     private int blocksLeft; // FIX might not need this
     private boolean myGameIsPaused;
@@ -126,18 +119,12 @@ public class GameMain extends Application {
     }
 
     private void handleMouseClick() {
-        if (myGameIsOver)
+        if (myGameIsOver || !(getCurrentGameScene() instanceof Level))
             return;
 
         myGameIsPaused = !myGameIsPaused;
-        if (myGameIsPaused) {
-            getCurrentGameScene().addNodeToRoot(PAUSE_RECT_1);
-            getCurrentGameScene().addNodeToRoot(PAUSE_RECT_2);
-        }
-        else {
-            getCurrentGameScene().removeNodeFromRoot(PAUSE_RECT_1);
-            getCurrentGameScene().removeNodeFromRoot(PAUSE_RECT_2);
-        }
+        Level currentLevel = (Level) getCurrentGameScene();
+        currentLevel.getPauser().togglePause(myGameIsPaused);
     }
 
     private void attachGameLoopAndPlay() {

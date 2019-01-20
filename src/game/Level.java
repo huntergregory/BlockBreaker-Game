@@ -17,6 +17,7 @@ public abstract class Level extends GameScene {
     ArrayList<Block> myBlockConfiguration;
     ArrayList<Powerup> myPowerupConfiguration;
     Random myRand;
+    Pauser myPauser;
 
 
     public Level(int width, int height) {
@@ -28,6 +29,7 @@ public abstract class Level extends GameScene {
         myRand = rand;
         myBlockConfiguration = new ArrayList<>();
         myPowerupConfiguration = new ArrayList<>();
+        myPauser = new Pauser(myAssignedWidth, myAssignedHeight, myRoot);
     }
 
     /**
@@ -62,4 +64,9 @@ public abstract class Level extends GameScene {
         addNodeToRoot(paddle.getImageView());
         return paddle;
     }
+
+    /**
+     * @return Pauser for the Level's Scene
+     */
+    public  Pauser getPauser() { return myPauser; }
 }
