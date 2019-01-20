@@ -36,16 +36,16 @@ public class Block extends GameObject {
 
     /**
      * Updates internal state and updates block's type if necessary.
-     * @return true if block should be destroyed after collision, false otherwise
+     * @return true if block still has more 'lives'
      */
     public boolean updateOnCollision() {
         BlockType nextType = getNextType();
         if (nextType == null) {
-            return true;
+            return false;
         }
         myType = nextType;
         setImageFromName(myType.getImageName());
-        return false;
+        return true;
     }
 
     //returns null if the current object is an alpha block

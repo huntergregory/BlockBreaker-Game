@@ -3,19 +3,14 @@ package game;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import javafx.scene.Node;
-import javafx.collections.ObservableList;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -72,7 +67,7 @@ public class GameMain extends Application {
     public void start (Stage stage) {
         myStage = stage;
         switchToScene(SPLASH_SCENE);
-        myStage.setScene(GAME_SCENES[myNumScene].getScene());
+        myStage.setScene(getCurrentGameScene().getScene());
         myStage.setTitle(TITLE);
         myStage.show();
 
@@ -81,15 +76,19 @@ public class GameMain extends Application {
 
     private void switchToScene(int numScene) {
         myNumScene = numScene;
-        if (GAME_SCENES[myNumScene] instanceof Level) {
+        if (getCurrentGameScene() instanceof Level) {
             assignLevelComponents();
             addEventListeners();
         }
         //else //FIX
     }
 
+    private GameScene getCurrentGameScene() {
+        return GAME_SCENES[myNumScene];
+    }
+
     private void assignLevelComponents() {
-        Level currentLevel = (Level) GAME_SCENES[myNumScene];
+        Level currentLevel = (Level) getCurrentGameScene();
         myBlocks = currentLevel.getBlocks();
         myPowerups = currentLevel.getPowerups();
         myBalls = currentLevel.resetAndGetBalls();
@@ -97,7 +96,7 @@ public class GameMain extends Application {
     }
 
     private void addEventListeners() {
-        Scene currentScene = GAME_SCENES[myNumScene].getScene();
+        Scene currentScene = getCurrentGameScene().getScene();
         currentScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
         currentScene.setOnMouseClicked(e -> handleMouseClick());
     }
@@ -130,12 +129,12 @@ public class GameMain extends Application {
 
         myGameIsPaused = !myGameIsPaused;
         if (myGameIsPaused) {
-            GAME_SCENES[myNumScene].addNodeToRoot(PAUSE_RECT_1);
-            GAME_SCENES[myNumScene].addNodeToRoot(PAUSE_RECT_2);
+            getCurrentGameScene().addNodeToRoot(PAUSE_RECT_1);
+            getCurrentGameScene().addNodeToRoot(PAUSE_RECT_2);
         }
         else {
-            GAME_SCENES[myNumScene].removeNodeFromRoot(PAUSE_RECT_1);
-            GAME_SCENES[myNumScene].removeNodeFromRoot(PAUSE_RECT_2);
+            getCurrentGameScene().removeNodeFromRoot(PAUSE_RECT_1);
+            getCurrentGameScene().removeNodeFromRoot(PAUSE_RECT_2);
         }
     }
 
@@ -150,88 +149,42 @@ public class GameMain extends Application {
     private void step (double elapsedTime) {
         if (myGameIsPaused || myGameIsOver)
             return;
-        moveObjects(elapsedTime);
-        catchPowerups();
-        updateBallsOnWallCollision();
-        updateBallsOnPaddleCollision();
-        updateAllOnBlockCollision();
-        myGameIsOver = !oneBallInBounds();
-    }
 
-    private void moveObjects(double elapsedTime) {
-        for (Ball ball : myBalls) {
-            ball.updatePosition(elapsedTime);
-        }
+        catchPowerups();
+
         for (Powerup powerup : myFallingPowerups) {
             powerup.updatePosition(elapsedTime);
         }
+
+        for (Ball ball : myBalls) {
+            ball.updatePosition(elapsedTime);
+            ArrayList<Block> blocksHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
+            updateBlocksAndPowerups(blocksHit);
+        }
+        myGameIsOver = !deleteBallsOutOfBounds();
     }
 
+    //FIX
     private void catchPowerups() {
         //delete powerups and remove from falling powerups
         //set boolean to eventually set ball velocity to 0 if power_shot
     }
 
-    private void updateBallsOnWallCollision() {
-        for (Ball ball : myBalls) {
-            if (ball.getY() <= 0 || ball.getY() + ball.getHeight() >= GAME_SCENES[myNumScene].getCurrentHeight())
-                ball.multiplyVelY(-1);
-
-            if (ball.getX() <= 0 || ball.getX() + ball.getWidth() >= GAME_SCENES[myNumScene].getCurrentWidth())
-                ball.multiplyVelX(-1);
-        }
-    }
-
-    private void updateBallsOnPaddleCollision() {
-        for (Ball ball : myBalls) {
-            if (myPaddle.getParentBounds().intersects(ball.getParentBounds())) {
-                //FIX consider the holding the ball powerup
-                reflectBallOffPaddle(ball);
+    private void updateBlocksAndPowerups(ArrayList<Block> blocksHit) {
+        ArrayList<Block> destroyedBlocks = new ArrayList<>();
+        for (Block block : blocksHit) {
+            System.out.println("here");
+            releasePowerup(block);
+            boolean blockStillAlive = block.updateOnCollision();
+            if (!blockStillAlive) {
+                getCurrentGameScene().removeNodeFromRoot(block.getImageView());
+                destroyedBlocks.add(block);
             }
         }
+        myBlocks.removeAll(destroyedBlocks);
     }
 
-    private void reflectBallOffPaddle(Ball ball) {
-        int thirdOfWidth = (int) (myPaddle.getWidth() / 3);
-        boolean hitLeftThird = ball.getX() < myPaddle.getX() + thirdOfWidth;
-        boolean hitRightThird = ball.getX() > myPaddle.getX() + 2 * thirdOfWidth;
-        double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
-
-        ball.multiplyVelY(-1 * multiplier);
-
-
-        if (hitLeftThird && ball.getVelX() > 0 || hitRightThird && ball.getVelX() <= 0)
-            multiplier *= -1;
-        ball.multiplyVelX(multiplier);
-    }
-
-    private void updateAllOnBlockCollision() {
-        for (Ball ball : myBalls) {
-            for (Block block : myBlocks) {
-                if (block.getParentBounds().intersects(ball.getParentBounds())) {
-                    reflectBallOffBlock(ball, block);
-                    releasePowerupIfNecessary(block);
-                    deleteBlockIfNecessary(block);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void reflectBallOffBlock(Ball ball, Block block) {
-        double multiplier = block.getMultiplier();
-        boolean vertical = isVerticalCollision(ball, block);
-        ball.multiplyVelX(vertical ? multiplier : -1 * multiplier);
-        ball.multiplyVelY(vertical ? -1 * multiplier : multiplier);
-    }
-
-    //FIX
-    private boolean isVerticalCollision(Ball ball, Block block) {
-        double ballCenterX = ball.getX() + ball.WIDTH / 2;
-        return block.getX() < ballCenterX && ballCenterX < block.getX() + block.getWidth();
-    }
-
-    private void releasePowerupIfNecessary(Block block) {
+    private void releasePowerup(Block block) {
         for (Powerup powerup : myPowerups) {
             if (powerup.isWithin(block)) {
                 powerup.setIsHidden(false);
@@ -240,34 +193,22 @@ public class GameMain extends Application {
         }
     }
 
-    private void deleteBlockIfNecessary(Block block) {
-        boolean blockIsDestroyed = block.updateOnCollision();
-        if (blockIsDestroyed) {
-            GAME_SCENES[myNumScene].removeNodeFromRoot(block.getImageView());
-            myBlocks.remove(block);
-        }
-    }
-
-    private boolean oneBallInBounds() {
+    private boolean deleteBallsOutOfBounds() {
+        ArrayList<Ball> outOfBoundsBalls = new ArrayList<>();
         for (Ball ball : myBalls) {
-            if (ball.getY() + Ball.HEIGHT >= GAME_SCENES[myNumScene].getCurrentHeight()) {
+            if (ball.hitFloor(getCurrentGameScene())) {
                 if (myBalls.size() == 1) {
-                    ball.multiplyVelY(0); //freeze the ball if its the last one
-                    ball.multiplyVelX(0);
+                    ball.halt();
                     return false;
                 }
                 else {
-                    deleteBall(ball);
-                    break;
+                    getCurrentGameScene().removeNodeFromRoot(ball.getImageView());
+                    outOfBoundsBalls.add(ball);
                 }
             }
         }
+        myBalls.removeAll(outOfBoundsBalls);
         return true;
-    }
-
-    private void deleteBall(Ball ball) {
-        GAME_SCENES[myNumScene].removeNodeFromRoot(ball.getImageView());
-        myBalls.remove(ball);
     }
 
     public static void main(String[] args) {

@@ -7,7 +7,7 @@ package game;
 public class Powerup extends GameObject{
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
-    public static final int VEL_Y = 20;
+    public static final int VEL_Y = 30;
 
     private PowerupType myType;
     private boolean myIsHidden;

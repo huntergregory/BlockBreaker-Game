@@ -3,9 +3,11 @@ package game;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.ArrayList;
+
 /**
  * An ImageView with velocity components, representing a ball.
- * Position must be set using ImageView methods after the object is created.
+ * Provides methods to internally update velocity upon hitting multiple GameObjects
  * @author Hunter Gregory
  */
 public class Ball extends GameObject {
@@ -39,19 +41,67 @@ public class Ball extends GameObject {
     }
 
     /**
-     * Multiply and update x component of velocity
-     * @param multiplier
+     * Updates the velocity of the ball
+     * @param level
+     * @param paddle
+     * @return ArrayList of Blocks hit
      */
-    public void multiplyVelX(double multiplier) {
-        myVelX = assertExtrema(multiplier, this.getVelX());
+    public ArrayList<Block> reflectOffAnyObstacles(Level level, Paddle paddle, ArrayList<Block> blocks) {
+        reflectOffWall(level);
+        reflectOffPaddle(paddle);
+        return reflectOffBlock(blocks);
     }
 
-    /**
-     * Multiply and update x component of velocity
-     * @param multiplier
-     */
-    public void multiplyVelY(double multiplier) {
-        myVelY = assertExtrema(multiplier, this.getVelY());
+    private void reflectOffWall(Level level) {
+        if (this.getY() <= 0 || this.getY() + HEIGHT >= level.getCurrentHeight())
+            this.multiplyVelY(-1);
+
+        if (this.getX() <= 0 || this.getX() + WIDTH >= level.getCurrentWidth())
+            this.multiplyVelX(-1);
+    }
+
+    private ArrayList<Block> reflectOffBlock(ArrayList<Block> list) {
+        ArrayList<Block> blocksHit = new ArrayList<>();
+        for (Block block : list) {
+            if (!block.getParentBounds().intersects(this.getParentBounds()))
+                continue;
+            blocksHit.add(block);
+            double multiplier = block.getMultiplier();
+            boolean vertical = isVerticalCollision(block);
+            this.multiplyVelX(vertical ? multiplier : -1 * multiplier);
+            this.multiplyVelY(vertical ? -1 * multiplier : multiplier);
+        }
+        return blocksHit;
+    }
+
+    //FIX
+    private boolean isVerticalCollision(Block block) {
+        double centerX = this.getX() + WIDTH / 2;
+        return block.getX() < centerX && centerX < block.getX() + block.getWidth();
+    }
+
+    private void reflectOffPaddle(Paddle paddle) {
+        if (!paddle.getParentBounds().intersects(this.getParentBounds()))
+            return;
+
+        int thirdOfWidth = (int) (paddle.getWidth() / 3);
+        boolean hitLeftThird = this.getX() < paddle.getX() + thirdOfWidth;
+        boolean hitRightThird = this.getX() > paddle.getX() + 2 * thirdOfWidth;
+        double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
+
+        this.multiplyVelY(-1 * multiplier);
+
+        if (hitLeftThird && myVelX > 0 || hitRightThird && myVelX <= 0)
+            multiplier *= -1;
+        this.multiplyVelX(multiplier);
+    }
+
+    private void multiplyVelX(double multiplier) {
+        myVelX = assertExtrema(multiplier, myVelX);
+    }
+
+    private void multiplyVelY(double multiplier) {
+        myVelY = assertExtrema(multiplier, myVelY);
     }
 
     private int assertExtrema(double multiplier, int oldVel) {
@@ -62,6 +112,18 @@ public class Ball extends GameObject {
         if (Math.abs(newVel) > MAX_VEL)
             newVel = isNegative ? -1 * MAX_VEL : MAX_VEL;
         return newVel;
+    }
+
+    /**
+     * Sets the Ball's velocity to zero
+     */
+    public void halt() {
+        myVelX = 0;
+        myVelY = 0;
+    }
+
+    public boolean hitFloor(GameScene gameScene) {
+        return this.getY() + HEIGHT >= gameScene.getCurrentHeight();
     }
 
     /**
