@@ -46,6 +46,7 @@ public class GameMain extends Application {
     private ArrayList<Ball> myBalls = new ArrayList<>();
     private ArrayList<Laser> myLasers = new ArrayList<>();
     private Paddle myPaddle;
+    private PowerAimer myAimer = new PowerAimer();
     private boolean myGameIsPaused;
     private boolean myGameIsOver;
     private boolean myCanShootLasers;
@@ -95,17 +96,45 @@ public class GameMain extends Application {
     private void handleKeyInput(KeyCode code) {
         if (myGameIsOver || myGameIsPaused)
             return;
-        handleMovingPaddle(code);
-        handleCheatCodes(code);
+
+        if (myAimer.getIsCurrentlyAiming()) {
+            handleAimer(code);
+        }
+        else {
+            handlePaddle(code);
+            handleLaser(code);
+            handleCheatCodes(code);
+        }
     }
 
-    private void handleMovingPaddle(KeyCode code) {
-        if (myGameIsOver)
-            return;
-        if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH)
+    private void handleAimer(KeyCode code) {
+        if (code == KeyCode.RIGHT) {
+            myAimer.rotateClockwise();
+        }
+        if (code == KeyCode.LEFT) {
+            myAimer.rotateCounterClockwise();
+        }
+        if (code == KeyCode.SPACE) {
+            myAimer.fire();
+        }
+    }
+
+    private void handlePaddle(KeyCode code) {
+        boolean isAiming = myAimer.getIsCurrentlyAiming();
+        if (code == KeyCode.RIGHT && !isAiming && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH)
             myPaddle.setX(myPaddle.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
-        else if (code == KeyCode.LEFT && myPaddle.getX() > 0)
+        if (code == KeyCode.LEFT && !isAiming && myPaddle.getX() > 0)
             myPaddle.setX(myPaddle.getX() - Paddle.SPEED); //same as above
+    }
+
+    private void handleLaser(KeyCode code) {
+        if (code == KeyCode.SPACE) {
+            if (myCanShootLasers) {
+                Laser laser = new Laser(myPaddle);
+                myLasers.add(laser);
+                getCurrentGameScene().addGameObjectToRoot(laser);
+            }
+        }
     }
 
     private void handleCheatCodes(KeyCode code) {
@@ -117,13 +146,8 @@ public class GameMain extends Application {
             makeBigPaddle();
         if (code == KeyCode.L)
             addLasers();
-        if (code == KeyCode.SPACE)
-            if (myCanShootLasers) {
-                Laser laser = new Laser(myPaddle);
-                myLasers.add(laser);
-                getCurrentGameScene().addGameObjectToRoot(laser);
-            }
-
+        if (code == KeyCode.P)
+            initPowerShot();
     }
 
     private void handleMouseClick() {
@@ -176,6 +200,9 @@ public class GameMain extends Application {
                     ball.updatePosition(elapsedTime);
                     Block blockHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
                     updateBlockAndFallingPowerups(blockHit);
+                    if (myAimer.getPowerShotIsOn() && !myAimer.getIsCurrentlyAiming() && ball.hitGameObject(myPaddle)) {
+                        myAimer.activate(getCurrentGameScene().getRoot(), ball);
+                    }
                 }
                 deleteBallsOutOfBounds();
 
@@ -188,7 +215,7 @@ public class GameMain extends Application {
         }
     }
 
-    //FIX
+    //FIX, all need timers
     private void catchPowerups() {
         ArrayList<Powerup> caughtPowerups = new ArrayList<>();
         for (Powerup powerup : myFallingPowerups) {
@@ -207,9 +234,10 @@ public class GameMain extends Application {
                     break; //FIX
                 }
                 case BIG_PADDLE: {
-                    makeBigPaddle();
+                    makeBigPaddle(); //FIX
                 }
                 case POWER_SHOT:{
+                    initPowerShot();
                     break; //FIX
                 }
             }
@@ -220,10 +248,12 @@ public class GameMain extends Application {
         //check to see if a power up fell way past the screen <-- DELETE them
     }
 
+    //FIX, add timer
     private void addLasers() {
         myCanShootLasers = true;
     }
 
+    //FIX, add timer
     private void splitBalls() {
         ArrayList<Ball> newBalls = new ArrayList<>();
         int[] xMult = {-1, -1, 1};
@@ -238,8 +268,14 @@ public class GameMain extends Application {
         myBalls.addAll(newBalls);
     }
 
+    //FIX, add timer
     private void makeBigPaddle() {
         myPaddle.setWidth(myPaddle.getWidth() + myPaddle.DEFAULT_WIDTH / 2); // FIX make a timer
+    }
+
+    private void initPowerShot() {
+        myAimer.turnPowerShotOn();
+        myCanShootLasers = false;
     }
 
     private void updateBlockAndFallingPowerups(Block blockHit) {

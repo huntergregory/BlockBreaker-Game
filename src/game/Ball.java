@@ -1,8 +1,5 @@
 package game;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-
 import java.util.ArrayList;
 
 /**
@@ -19,6 +16,7 @@ public class Ball extends GameObject implements Movable {
 
     private int myVelX;
     private int myVelY;
+    private boolean myIsHalted;
 
     /**
      * Create a Ball with an image and initial velocity of 0
@@ -38,6 +36,7 @@ public class Ball extends GameObject implements Movable {
         this.setY(y);
         myVelX = velX;
         myVelY = velY;
+        myIsHalted = false;
     }
 
     @Override
@@ -110,6 +109,8 @@ public class Ball extends GameObject implements Movable {
     }
 
     private int assertExtrema(double multiplier, int oldVel) {
+        if (myIsHalted)
+            return oldVel;
         int newVel = (int) Math.round(multiplier * oldVel);
         boolean isNegative = newVel < 0;
         if (Math.abs(newVel) < MIN_VEL)
@@ -120,11 +121,26 @@ public class Ball extends GameObject implements Movable {
     }
 
     /**
+     * Brings Ball's velocity to the maximum y value and adjusts the x velocity accordingly
+     * to send the Ball in the specified direction
+     * @param angle
+     */
+    public void unhaltWithMaxVelocity(double angle) {
+        myVelY = -MAX_VEL;
+        double tangent = Math.tan(angle) * -myVelY;
+        myVelX = (int) tangent;
+        System.out.println(tangent);
+        System.out.println(myVelX);
+        myIsHalted = false;
+    }
+
+    /**
      * Sets the Ball's velocity to zero
      */
     public void halt() {
         myVelX = 0;
         myVelY = 0;
+        myIsHalted = true;
     }
 
     public boolean hitFloor(GameScene gameScene) {

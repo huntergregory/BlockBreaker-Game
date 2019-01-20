@@ -2,6 +2,10 @@ package game;
 
 import java.util.ArrayList;
 
+/**
+ * Represents a laser coming out of a Paddle, capable of destroying Blocks.
+ * @author Hunter Gregory
+ */
 public class Laser extends GameObject implements Movable {
     public static final int WIDTH = 3;
     public static final int HEIGHT = 12;
