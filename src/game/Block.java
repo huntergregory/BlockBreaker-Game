@@ -66,6 +66,11 @@ public class Block extends GameObject {
     }
 
     /**
+     * @return this Block's BlockType
+     */
+    public BlockType getType() { return myType; }
+
+    /**
      * @return block's reflection multiplier
      */
     public double getMultiplier() { return myType.getMultiplier(); }

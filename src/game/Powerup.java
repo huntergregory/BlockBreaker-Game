@@ -4,7 +4,7 @@ package game;
  * Consists of a PowerupType and ImageView representing the ball
  * @author Hunter Gregory
  */
-public class Powerup extends GameObject{
+public class Powerup extends GameObject implements Movable {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
     public static final int VEL_Y = 30;
@@ -18,25 +18,22 @@ public class Powerup extends GameObject{
         setIsHidden(true);
     }
 
-    /**
-     * Set y position of ImageView to make powerup fall
-     */
+    @Override
     public void updatePosition(double elapsedTime) {
         setY(elapsedTime * VEL_Y + getY());
     }
 
     /**
+     * @param block
      * @return true if Powerup is hidden within the Block.
      */
-    public boolean isWithin(Block block) {
-        return this.getX() >= block.getX() &&
-                this.getX() <= block.getX() + block.getWidth() &&
-                this.getY() >= block.getY() &&
-                this.getY() <= block.getY() + block.getHeight();
+    public boolean isWithinAlpha(Block block) {
+        return this.hitGameObject(block) && block.getType().equals(BlockType.ALPHA); //hitGameObject is really just intersection
     }
 
     /**
      * A value of true will hide the ImageView
+     * @param bool
      */
     public void setIsHidden(boolean bool) {
         myIsHidden = bool;
@@ -45,6 +42,11 @@ public class Powerup extends GameObject{
         else
             setImageFromName(myType.getImageName());
     }
+
+    /**
+     * @return PowerupType
+     */
+    public PowerupType getType() { return myType; }
 
     /**
      * @return true if ImageView is hidden

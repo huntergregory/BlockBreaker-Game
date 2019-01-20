@@ -6,6 +6,7 @@ package game;
 public class Paddle extends GameObject {
     public static final int DEFAULT_WIDTH = 60;
     public static final int HEIGHT = 10;
+    public static final int SPEED = 20;
     public static final String IMAGE_NAME = "paddle.gif";
 
     /**
@@ -24,4 +25,5 @@ public class Paddle extends GameObject {
     public void setWidth(double length) {
         myImageView.setFitWidth(length); //FIX animate it
     }
+
 }

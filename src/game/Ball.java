@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * Provides methods to internally update velocity upon hitting multiple GameObjects
  * @author Hunter Gregory
  */
-public class Ball extends GameObject {
+public class Ball extends GameObject implements Movable {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
     public static final int MAX_VEL = 160;
@@ -21,7 +21,7 @@ public class Ball extends GameObject {
     private int myVelY;
 
     /**
-     * Create a game.Ball with an image and initial velocity of 0
+     * Create a Ball with an image and initial velocity of 0
      */
     public Ball() {
         this(0, 0, 0, 0);
@@ -40,13 +40,19 @@ public class Ball extends GameObject {
         myVelY = velY;
     }
 
+    @Override
+    public void updatePosition(double elapsedTime) {
+        this.setX(this.getX() + myVelX * elapsedTime);
+        this.setY(this.getY() + myVelY * elapsedTime);
+    }
+
     /**
      * Updates the velocity of the ball
      * @param level
      * @param paddle
      * @return ArrayList of Blocks hit
      */
-    public ArrayList<Block> reflectOffAnyObstacles(Level level, Paddle paddle, ArrayList<Block> blocks) {
+    public Block reflectOffAnyObstacles(Level level, Paddle paddle, ArrayList<Block> blocks) {
         reflectOffWall(level);
         reflectOffPaddle(paddle);
         return reflectOffBlock(blocks);
@@ -60,18 +66,17 @@ public class Ball extends GameObject {
             this.multiplyVelX(-1);
     }
 
-    private ArrayList<Block> reflectOffBlock(ArrayList<Block> list) {
-        ArrayList<Block> blocksHit = new ArrayList<>();
+    private Block reflectOffBlock(ArrayList<Block> list) {
         for (Block block : list) {
-            if (!block.getParentBounds().intersects(this.getParentBounds()))
+            if (!this.hitGameObject(block))
                 continue;
-            blocksHit.add(block);
             double multiplier = block.getMultiplier();
             boolean vertical = isVerticalCollision(block);
             this.multiplyVelX(vertical ? multiplier : -1 * multiplier);
             this.multiplyVelY(vertical ? -1 * multiplier : multiplier);
+            return block;
         }
-        return blocksHit;
+        return null;
     }
 
     //FIX
@@ -81,7 +86,7 @@ public class Ball extends GameObject {
     }
 
     private void reflectOffPaddle(Paddle paddle) {
-        if (!paddle.getParentBounds().intersects(this.getParentBounds()))
+        if (!this.hitGameObject(paddle))
             return;
 
         int thirdOfWidth = (int) (paddle.getWidth() / 3);
@@ -124,15 +129,6 @@ public class Ball extends GameObject {
 
     public boolean hitFloor(GameScene gameScene) {
         return this.getY() + HEIGHT >= gameScene.getCurrentHeight();
-    }
-
-    /**
-     * Internally updates x and y positions based on x and y velocities and a specified time step
-     * @param elapsedTime
-     */
-    public void updatePosition(double elapsedTime) {
-        this.setX(this.getX() + myVelX * elapsedTime);
-        this.setY(this.getY() + myVelY * elapsedTime);
     }
 
     /**

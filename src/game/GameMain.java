@@ -31,7 +31,6 @@ public class GameMain extends Application {
     public static final int FRAMES_PER_SECOND = 300; // less paddle lag at this number
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
-    public static final int PADDLE_SPEED = 20;
     public static final int MAX_LIVES = 3;
     private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
     public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) };
@@ -112,10 +111,10 @@ public class GameMain extends Application {
         if (myGameIsOver)
             return;
         if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH) {
-            myPaddle.setX(myPaddle.getX() + PADDLE_SPEED); //currently overshoots boundary a little due to large PADDLE_SPEED
+            myPaddle.setX(myPaddle.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
         }
         else if (code == KeyCode.LEFT && myPaddle.getX() > 0) {
-            myPaddle.setX(myPaddle.getX() - PADDLE_SPEED); //same as above
+            myPaddle.setX(myPaddle.getX() - Paddle.SPEED); //same as above
         }
     }
 
@@ -147,68 +146,101 @@ public class GameMain extends Application {
     }
 
     private void step (double elapsedTime) {
-        if (myGameIsPaused || myGameIsOver)
+        if (myGameIsPaused)
             return;
-
-        catchPowerups();
-
-        for (Powerup powerup : myFallingPowerups) {
-            powerup.updatePosition(elapsedTime);
+        if (myGameIsOver) {
+            //FIX
         }
+        else {
+            catchPowerups();
 
-        for (Ball ball : myBalls) {
-            ball.updatePosition(elapsedTime);
-            ArrayList<Block> blocksHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
-            updateBlocksAndPowerups(blocksHit);
+            for (Powerup powerup : myFallingPowerups) {
+                powerup.updatePosition(elapsedTime);
+            }
+
+            for (Ball ball : myBalls) {
+                ball.updatePosition(elapsedTime);
+                Block blockHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
+                updateBlockAndFallingPowerups(blockHit);
+            }
+            deleteBallsOutOfBounds();
+
+            if (myBlocks.size() == 0)
+                switchToScene(myNumScene + 1);
+            if (myBalls.size() == 0)
+                loseLife();
         }
-        myGameIsOver = !deleteBallsOutOfBounds();
     }
 
     //FIX
     private void catchPowerups() {
-        //delete powerups and remove from falling powerups
-        //set boolean to eventually set ball velocity to 0 if power_shot
-    }
+        ArrayList<Powerup> caughtPowerups = new ArrayList<>();
+        for (Powerup powerup : myFallingPowerups) {
+            if (!powerup.hitGameObject(myPaddle))
+                continue;
 
-    private void updateBlocksAndPowerups(ArrayList<Block> blocksHit) {
-        ArrayList<Block> destroyedBlocks = new ArrayList<>();
-        for (Block block : blocksHit) {
-            System.out.println("here");
-            releasePowerup(block);
-            boolean blockStillAlive = block.updateOnCollision();
-            if (!blockStillAlive) {
-                getCurrentGameScene().removeNodeFromRoot(block.getImageView());
-                destroyedBlocks.add(block);
+            caughtPowerups.add(powerup);
+            getCurrentGameScene().removeNodeFromRoot(powerup.getImageView());
+            switch (powerup.getType()) {
+                case LASER: {
+                    break;//FIX
+                }
+                case BALL_SPLIT: {
+                    break; //FIX
+                }
+                case OVERSIZE: {
+                    myPaddle.setWidth(myPaddle.getWidth() + myPaddle.DEFAULT_WIDTH / 2); // FIX make a timer
+                }
+                case POWER_SHOT:{
+                    break; //FIX
+                }
             }
         }
-        myBlocks.removeAll(destroyedBlocks);
+        myFallingPowerups.removeAll(caughtPowerups);
+        myPowerups.removeAll(caughtPowerups);
+        //set boolean to eventually set ball velocity to 0 if power_shot
+        //check to see if a power up fell way past the screen
+    }
+
+    private void updateBlockAndFallingPowerups(Block blockHit) {
+        if (blockHit == null)
+            return;
+        releasePowerup(blockHit);
+        boolean blockStillAlive = blockHit.updateOnCollision();
+        if (!blockStillAlive) {
+            getCurrentGameScene().removeNodeFromRoot(blockHit.getImageView());
+            myBlocks.remove(blockHit);
+        }
     }
 
     private void releasePowerup(Block block) {
         for (Powerup powerup : myPowerups) {
-            if (powerup.isWithin(block)) {
+            if (powerup.isWithinAlpha(block)) {
                 powerup.setIsHidden(false);
                 myFallingPowerups.add(powerup);
             }
         }
     }
 
-    private boolean deleteBallsOutOfBounds() {
+    private void deleteBallsOutOfBounds() {
         ArrayList<Ball> outOfBoundsBalls = new ArrayList<>();
         for (Ball ball : myBalls) {
             if (ball.hitFloor(getCurrentGameScene())) {
-                if (myBalls.size() == 1) {
+                if (myBalls.size() == 1)
                     ball.halt();
-                    return false;
-                }
-                else {
+                else
                     getCurrentGameScene().removeNodeFromRoot(ball.getImageView());
-                    outOfBoundsBalls.add(ball);
-                }
+
+                outOfBoundsBalls.add(ball);
             }
         }
         myBalls.removeAll(outOfBoundsBalls);
-        return true;
+    }
+
+    private void loseLife() {
+        myLives -= 1;
+        if (myLives == 0)
+            myGameIsOver = true;
     }
 
     public static void main(String[] args) {

@@ -33,18 +33,18 @@ public abstract class Level extends GameScene {
     /**
      * @return list of Blocks in this level
      */
-    public ArrayList<Block> getBlocks() { return myBlockConfiguration; }
+    protected ArrayList<Block> getBlocks() { return myBlockConfiguration; }
 
     /**
      * @return list of Powerups in this level
      */
-    public ArrayList<Powerup> getPowerups() { return myPowerupConfiguration; }
+    protected ArrayList<Powerup> getPowerups() { return myPowerupConfiguration; }
 
     /**
      * Call to initializeAndGetBlocks scene or restart after lost life.
      * @return list of one Ball
      */
-    public ArrayList<Ball> resetAndGetBalls() {
+    protected ArrayList<Ball> resetAndGetBalls() {
         ArrayList<Ball> list = new ArrayList<>();
         Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
         list.add(ball);
@@ -56,7 +56,7 @@ public abstract class Level extends GameScene {
      * Call to initializeAndGetBlocks scene or restart after lost life.
      * @return Paddle
      */
-    public Paddle resetAndGetPaddle() {
+    protected Paddle resetAndGetPaddle() {
         Paddle paddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
                 myAssignedHeight - Paddle.HEIGHT - 2);
         addNodeToRoot(paddle.getImageView());

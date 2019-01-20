@@ -10,7 +10,7 @@ import javafx.scene.image.ImageView;
  * The one exception is adding or removing a GameObject from the current scene's root.
  */
 public abstract class GameObject {
-    protected ImageView myImageView;
+    public ImageView myImageView;
 
     /**
      * Construct a GameObject with a particular image
@@ -24,6 +24,13 @@ public abstract class GameObject {
         myImageView.setPreserveRatio(false);
         myImageView.setFitWidth(width);
         myImageView.setFitHeight(height);
+    }
+
+    /**
+     * @return true if this GameObject is intersecting another
+     */
+    public boolean hitGameObject(GameObject object) {
+        return object.getParentBounds().intersects(this.getParentBounds());
     }
 
     /**
