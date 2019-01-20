@@ -15,6 +15,7 @@ import javafx.util.Duration;
 import javafx.scene.Node;
 import javafx.collections.ObservableList;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -37,7 +38,10 @@ public class GameMain extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final int PADDLE_SPEED = 20;
     public static final int MAX_LIVES = 3;
-    public static final Level[] LEVELS = { new LevelOne(), new LevelOne() };
+    private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
+    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) };
+    public static final int SPLASH_SCENE = 1;
+    public static final int CUSTOM_SCENE = 0;
     public static final int PAUSE_RECT_WIDTH = 30;
     public static final int PAUSE_RECT_HEIGHT = 80;
     public static final Rectangle PAUSE_RECT_1 = new Rectangle(SIZE_WIDTH / 2 - 3 * PAUSE_RECT_WIDTH / 2,
@@ -49,9 +53,10 @@ public class GameMain extends Application {
 
 
     private Stage myStage;
-    private SceneManager mySceneManager;
+    private int myNumScene;
     private int myLives = MAX_LIVES;
     private ArrayList<Block> myBlocks;
+    private ArrayList<Powerup> myPowerups;
     private ArrayList<Ball> myBalls;
     private Paddle myPaddle;
     private int blocksLeft; // FIX might not need this
@@ -65,37 +70,40 @@ public class GameMain extends Application {
     @Override
     public void start (Stage stage) {
         myStage = stage;
-        mySceneManager = new SceneManager(LEVELS, SIZE_WIDTH, SIZE_HEIGHT);
-        addLevelComponents(); // FIX to enable splash
-        myStage.setScene(mySceneManager.getSplashScreen()); // FIX
+        switchToScene(SPLASH_SCENE);
+        myStage.setScene(GAME_SCENES[myNumScene].getScene());
         myStage.setTitle(TITLE);
         myStage.show();
 
         attachGameLoopAndPlay();
     }
 
-    private void attachGameLoopAndPlay() {
-        var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
-        var animation = new Timeline();
-        animation.setCycleCount(Timeline.INDEFINITE);
-        animation.getKeyFrames().add(frame);
-        animation.play();
+    private void switchToScene(int numScene) {
+        myNumScene = numScene;
+        if (GAME_SCENES[myNumScene] instanceof Level) {
+            assignLevelComponents();
+            addEventListeners();
+        }
+        //else //FIX
     }
 
-    private void addLevelComponents() {
-        myBlocks = mySceneManager.getNewLevelBlocks();
-        myBalls = mySceneManager.resetAndGetBalls();
-        myPaddle = mySceneManager.resetAndGetPaddle();
-        addEventListeners();
+    private void assignLevelComponents() {
+        Level currentLevel = (Level) GAME_SCENES[myNumScene];
+        myBlocks = currentLevel.getBlocks();
+        myPowerups = currentLevel.getPowerups();
+        myBalls = currentLevel.resetAndGetBalls();
+        myPaddle = currentLevel.resetAndGetPaddle();
     }
 
     private void addEventListeners() {
-        Scene scene = mySceneManager.getCurrentScene();
-        scene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
-        scene.setOnMouseClicked(e -> handleMouseClick());
+        Scene currentScene = GAME_SCENES[myNumScene].getScene();
+        currentScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
+        currentScene.setOnMouseClicked(e -> handleMouseClick());
     }
 
     private void handleKeyInput(KeyCode code) {
+        if (myGameIsOver || myGameIsPaused)
+            return;
         handleMovingPaddle(code);
         handleCheatCodes(code);
     }
@@ -121,19 +129,26 @@ public class GameMain extends Application {
 
         myGameIsPaused = !myGameIsPaused;
         if (myGameIsPaused) {
-            mySceneManager.addNodeToRoot(PAUSE_RECT_1);
-            mySceneManager.addNodeToRoot(PAUSE_RECT_2);
+            GAME_SCENES[myNumScene].addNodeToRoot(PAUSE_RECT_1);
+            GAME_SCENES[myNumScene].addNodeToRoot(PAUSE_RECT_2);
         }
         else {
-            mySceneManager.removeNodeFromRoot(PAUSE_RECT_1);
-            mySceneManager.removeNodeFromRoot(PAUSE_RECT_2);
+            GAME_SCENES[myNumScene].removeNodeFromRoot(PAUSE_RECT_1);
+            GAME_SCENES[myNumScene].removeNodeFromRoot(PAUSE_RECT_2);
         }
+    }
+
+    private void attachGameLoopAndPlay() {
+        var frame = new KeyFrame(Duration.millis(MILLISECOND_DELAY), event -> step(SECOND_DELAY));
+        var animation = new Timeline();
+        animation.setCycleCount(Timeline.INDEFINITE);
+        animation.getKeyFrames().add(frame);
+        animation.play();
     }
 
     private void step (double elapsedTime) {
         if (myGameIsPaused || myGameIsOver)
             return;
-
         moveBalls(elapsedTime);
         updateBallsOnWallCollision();
         updateBallsOnPaddleCollision();
@@ -149,10 +164,10 @@ public class GameMain extends Application {
 
     private void updateBallsOnWallCollision() {
         for (Ball ball : myBalls) {
-            if (ball.getY() <= 0 || ball.getY() + ball.getHeight() >= mySceneManager.getCurrentScene().getHeight())
+            if (ball.getY() <= 0 || ball.getY() + ball.getHeight() >= GAME_SCENES[myNumScene].getCurrentHeight())
                 ball.multiplyVelY(-1);
 
-            if (ball.getX() <= 0 || ball.getX() + ball.getWidth() >= mySceneManager.getCurrentScene().getWidth())
+            if (ball.getX() <= 0 || ball.getX() + ball.getWidth() >= GAME_SCENES[myNumScene].getCurrentWidth())
                 ball.multiplyVelX(-1);
         }
     }
@@ -207,14 +222,14 @@ public class GameMain extends Application {
     private void deleteBlockIfNecessary(Block block) {
         boolean blockIsDestroyed = block.updateOnCollision();
         if (blockIsDestroyed) {
-            mySceneManager.removeNodeFromRoot(block.getImageView());
+            GAME_SCENES[myNumScene].removeNodeFromRoot(block.getImageView());
             myBlocks.remove(block);
         }
     }
 
     private boolean oneBallInBounds() {
         for (Ball ball : myBalls) {
-            if (ball.getY() + Ball.HEIGHT >= mySceneManager.getCurrentScene().getHeight()) {
+            if (ball.getY() + Ball.HEIGHT >= GAME_SCENES[myNumScene].getCurrentHeight()) {
                 if (myBalls.size() == 1) {
                     ball.multiplyVelY(0); //freeze the ball if its the last one
                     ball.multiplyVelX(0);
@@ -230,7 +245,7 @@ public class GameMain extends Application {
     }
 
     private void deleteBall(Ball ball) {
-        mySceneManager.removeNodeFromRoot(ball.getImageView());
+        GAME_SCENES[myNumScene].removeNodeFromRoot(ball.getImageView());
         myBalls.remove(ball);
     }
 

@@ -20,16 +20,18 @@ public class Block extends GameObject {
      * Default constructor creates an alpha block
      */
     public Block() {
-        this(BlockType.ALPHA);
+        this(0, 0, BlockType.ALPHA);
     }
 
     /**
      * Create a game.Block with specified type and unspecified rectangle dimensions and position
      * @param type of block
      */
-    public Block(BlockType type) {
+    public Block(double x, double y, BlockType type) {
         super(type.getImageName(), WIDTH, HEIGHT);
         myType = type;
+        this.setX(x);
+        this.setY(y);
     }
 
     /**

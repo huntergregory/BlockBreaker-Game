@@ -11,7 +11,7 @@ import javafx.scene.image.ImageView;
 public class Ball extends GameObject {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
-    public static final int MAX_VEL = 140;
+    public static final int MAX_VEL = 160;
     public static final int MIN_VEL = 60;
     public static final String IMAGE_NAME = "ball.gif"; //FIX to make customizable
 

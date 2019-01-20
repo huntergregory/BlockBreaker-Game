@@ -7,10 +7,10 @@ import javafx.scene.image.ImageView;
 /**
  * A representation using an ImageView for an object in any level of this game.
  * Allows the Game's main method to work with GameObjects without dealing with ImageView's.
- * The one exception is using SceneManager to add or remove a GameObject from the current scene's root.
+ * The one exception is adding or removing a GameObject from the current scene's root.
  */
 public abstract class GameObject {
-    private ImageView myImageView;
+    protected ImageView myImageView;
 
     /**
      * Construct a GameObject with a particular image

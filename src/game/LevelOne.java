@@ -1,6 +1,11 @@
 package game;
 
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Random;
 
 /**
  * A basic level with destructible blocks clumped in the middle of the screen.
@@ -13,72 +18,73 @@ import java.util.ArrayList;
  *
  * @author Hunter Gregory
  */
-public class LevelOne implements Level {
+public class LevelOne extends Level {
     private final int DISTANCE_FROM_SIDES = 1;  // in Block.WIDTH units
     private final int DISTANCE_FROM_TOP = 3;    // in Block.HEIGHT units
     private final int DISTANCE_FROM_BOTTOM = 15; // in Block.HEIGHT units
 
-    private ArrayList<Block> myConfiguration;
     private int myNumRows;
     private int myNumCols;
 
-    @Override
-    public ArrayList<Block> initialize(double sceneWidth, double sceneHeight) {
-        myConfiguration = new ArrayList<>();
-        myNumCols = getNumColumns(sceneWidth);
-        myNumRows = getNumRows(sceneHeight);
-        double xStart = getXStart(sceneWidth);
-        double yStart = getYStart(sceneHeight);
-        System.out.println("columns: " + myNumCols + "\nrows: " + myNumRows + "\nStart: (" + xStart + ", " + yStart + ")");
-        updateConfiguration(xStart, yStart);
-        for (Block b : myConfiguration) {
-            System.out.printf("Block at: (%.1f, %.1f)\n", b.getX(), b.getY());
-        }
-        return myConfiguration;
+    public LevelOne(int width, int height) { this(width, height, Color.WHITE, new Random()); }
+
+    public LevelOne(int width, int height, Paint backgroundColor, Random rand) {
+        super(width, height, backgroundColor, rand);
+        initializeBlocks();
+        initializePowerups();
+        addAllToRoot();
+    }
+
+    private void initializeBlocks() {
+        myNumCols = getNumColumns();
+        myNumRows = getNumRows();
+        double xStart = getXStart();
+        double yStart = getYStart();
+        updateBlockConfiguration(xStart, yStart);
     }
 
     //based on the equation:
-    // c * Block.WIDTH + (c-1) * SEPARATION_DISTANCE <= sceneWidth - (2 * DISTANCE_FROM_SIDES) * Block.WIDTH
-    private int getNumColumns(double sceneWidth) {
-        double numCols = (sceneWidth - (DISTANCE_FROM_SIDES * 2) * Block.WIDTH + SEPARATION_DISTANCE) /
+    // c * Block.WIDTH + (c-1) * SEPARATION_DISTANCE <= myAssignedWidth - (2 * DISTANCE_FROM_SIDES) * Block.WIDTH
+    private int getNumColumns() {
+        double numCols = (myAssignedWidth - (DISTANCE_FROM_SIDES * 2) * Block.WIDTH + SEPARATION_DISTANCE) /
                 (Block.WIDTH + SEPARATION_DISTANCE);
         return (int) Math.floor(numCols);
     }
 
     //based on the equation:
-    // r * Block.Height + (r-1) * SEPARATION_DISTANCE <= sceneHeight - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.Height
-    private int getNumRows(double sceneWidth) {
-        double numRows = (sceneWidth - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT + SEPARATION_DISTANCE) /
+    // r * Block.Height + (r-1) * SEPARATION_DISTANCE <= myAssignedHeight - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.Height
+    private int getNumRows() {
+        double numRows = (myAssignedWidth - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT + SEPARATION_DISTANCE) /
         (Block.HEIGHT + SEPARATION_DISTANCE);
         return (int) Math.floor(numRows);
     }
 
-    private double getXStart(double sceneWidth) {
-        double extraSpace = sceneWidth - myNumCols * Block.WIDTH - (myNumCols - 1) * SEPARATION_DISTANCE -
+    private double getXStart() {
+        double extraSpace = myAssignedWidth - myNumCols * Block.WIDTH - (myNumCols - 1) * SEPARATION_DISTANCE -
                 (2 * DISTANCE_FROM_SIDES) * Block.WIDTH;
         return extraSpace / 2 + Block.WIDTH * DISTANCE_FROM_SIDES;
     }
 
-    private double getYStart(double sceneHeight) {
-        double extraSpace = sceneHeight - myNumRows * Block.HEIGHT - (myNumRows - 1) * SEPARATION_DISTANCE -
+    private double getYStart() {
+        double extraSpace = myAssignedHeight - myNumRows * Block.HEIGHT - (myNumRows - 1) * SEPARATION_DISTANCE -
                 (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT;
         return extraSpace / 2 + Block.HEIGHT * DISTANCE_FROM_TOP;
     }
 
-    private void updateConfiguration(double xStart, double yStart) {
+    private void updateBlockConfiguration(double xStart, double yStart) {
         double xCurrent = xStart;
         double yCurrent = yStart;
 
         for (int r = 0; r< myNumRows; r++) {
             for (int c = 0; c< myNumCols; c++) {
                 if (isAlphaBlockLocation(r,c)) {
-                    appendBlock(xCurrent, yCurrent, BlockType.ALPHA);
+                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.ALPHA));
                 }
                 else if (isBetaBlockLocation(r,c)) {
-                    appendBlock(xCurrent, yCurrent, BlockType.BETA);
+                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.BETA));
                 }
                 else {
-                    appendBlock(xCurrent, yCurrent, BlockType.GAMMA);
+                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.GAMMA));
                 }
                 xCurrent += Block.WIDTH + SEPARATION_DISTANCE;
             }
@@ -98,12 +104,28 @@ public class LevelOne implements Level {
         return row == 1 || row == myNumRows - 2 || col == 1 || col == myNumCols - 2;
     }
 
-    private void appendBlock(double xCurrent, double yCurrent, BlockType type) {
-        Block block = new Block(type);
-        block.setX(xCurrent);
-        block.setY(yCurrent);
-        myConfiguration.add(block);
+    //assumes there are at least NUM_POWERUPS blocks in myBlockConfiguration
+    private void initializePowerups() {
+        HashSet<Integer> indices = new HashSet<>();
+        while (myPowerupConfiguration.size() < NUM_POWERUPS) {
+            var powerup = Powerup.getRandomPowerup();
+            Integer randIndex = myRand.nextInt(myBlockConfiguration.size());
+            if (indices.contains(randIndex))
+                continue;
+            Block correspondingBlock = myBlockConfiguration.get(randIndex);
+            powerup.setX(correspondingBlock.getX() + ((Block.WIDTH - Powerup.WIDTH) / 2));
+            powerup.setY(correspondingBlock.getY() + ((Block.HEIGHT - Powerup.HEIGHT) / 2));
+            myPowerupConfiguration.add(powerup);
+            indices.add(randIndex);
+        }
     }
 
-
+    private void addAllToRoot() {
+        for (Block block : myBlockConfiguration) {
+            addNodeToRoot(block.getImageView());
+        }
+        for (Powerup powerup : myPowerupConfiguration) {
+            addNodeToRoot(powerup.getImageView());
+        }
+    }
 }

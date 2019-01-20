@@ -22,11 +22,6 @@ public class Paddle extends GameObject {
      * @param length
      */
     public void setWidth(double length) {
-        this.getImageView().setFitWidth(length); //FIX animate it
+        myImageView.setFitWidth(length); //FIX animate it
     }
-
-    /**
-     * @return width of Paddle's Rectangle
-     */
-    public double getWidth() { return this.getImageView().getBoundsInParent().getWidth(); }
 }
