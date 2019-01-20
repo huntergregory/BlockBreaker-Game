@@ -19,6 +19,23 @@ public class Powerup extends GameObject{
     }
 
     /**
+     * Set y position of ImageView to make powerup fall
+     */
+    public void updatePosition(double elapsedTime) {
+        setY(elapsedTime * VEL_Y + getY());
+    }
+
+    /**
+     * @return true if Powerup is hidden within the Block.
+     */
+    public boolean isWithin(Block block) {
+        return this.getX() >= block.getX() &&
+                this.getX() <= block.getX() + block.getWidth() &&
+                this.getY() >= block.getY() &&
+                this.getY() <= block.getY() + block.getHeight();
+    }
+
+    /**
      * A value of true will hide the ImageView
      */
     public void setIsHidden(boolean bool) {

@@ -55,9 +55,10 @@ public class GameMain extends Application {
     private Stage myStage;
     private int myNumScene;
     private int myLives = MAX_LIVES;
-    private ArrayList<Block> myBlocks;
-    private ArrayList<Powerup> myPowerups;
-    private ArrayList<Ball> myBalls;
+    private ArrayList<Block> myBlocks = new ArrayList<>();
+    private ArrayList<Powerup> myPowerups = new ArrayList<>();
+    private ArrayList<Powerup> myFallingPowerups = new ArrayList<>();
+    private ArrayList<Ball> myBalls = new ArrayList<>();
     private Paddle myPaddle;
     private int blocksLeft; // FIX might not need this
     private boolean myGameIsPaused;
@@ -149,17 +150,26 @@ public class GameMain extends Application {
     private void step (double elapsedTime) {
         if (myGameIsPaused || myGameIsOver)
             return;
-        moveBalls(elapsedTime);
+        moveObjects(elapsedTime);
+        catchPowerups();
         updateBallsOnWallCollision();
         updateBallsOnPaddleCollision();
         updateAllOnBlockCollision();
         myGameIsOver = !oneBallInBounds();
     }
 
-    private void moveBalls(double elapsedTime) {
+    private void moveObjects(double elapsedTime) {
         for (Ball ball : myBalls) {
             ball.updatePosition(elapsedTime);
         }
+        for (Powerup powerup : myFallingPowerups) {
+            powerup.updatePosition(elapsedTime);
+        }
+    }
+
+    private void catchPowerups() {
+        //delete powerups and remove from falling powerups
+        //set boolean to eventually set ball velocity to 0 if power_shot
     }
 
     private void updateBallsOnWallCollision() {
@@ -200,6 +210,7 @@ public class GameMain extends Application {
             for (Block block : myBlocks) {
                 if (block.getParentBounds().intersects(ball.getParentBounds())) {
                     reflectBallOffBlock(ball, block);
+                    releasePowerupIfNecessary(block);
                     deleteBlockIfNecessary(block);
                     break;
                 }
@@ -214,9 +225,19 @@ public class GameMain extends Application {
         ball.multiplyVelY(vertical ? -1 * multiplier : multiplier);
     }
 
+    //FIX
     private boolean isVerticalCollision(Ball ball, Block block) {
         double ballCenterX = ball.getX() + ball.WIDTH / 2;
-        return block.getX() < ballCenterX && ballCenterX < block.getX() + block.WIDTH;
+        return block.getX() < ballCenterX && ballCenterX < block.getX() + block.getWidth();
+    }
+
+    private void releasePowerupIfNecessary(Block block) {
+        for (Powerup powerup : myPowerups) {
+            if (powerup.isWithin(block)) {
+                powerup.setIsHidden(false);
+                myFallingPowerups.add(powerup);
+            }
+        }
     }
 
     private void deleteBlockIfNecessary(Block block) {
