@@ -110,16 +110,19 @@ public class GameMain extends Application {
     private void handleMovingPaddle(KeyCode code) {
         if (myGameIsOver)
             return;
-        if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH) {
+        if (code == KeyCode.RIGHT && myPaddle.getX() + myPaddle.getWidth() < SIZE_WIDTH)
             myPaddle.setX(myPaddle.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
-        }
-        else if (code == KeyCode.LEFT && myPaddle.getX() > 0) {
+        else if (code == KeyCode.LEFT && myPaddle.getX() > 0)
             myPaddle.setX(myPaddle.getX() - Paddle.SPEED); //same as above
-        }
     }
 
     private void handleCheatCodes(KeyCode code) {
-        //FIX
+        if (myGameIsOver)
+            return;
+        if (code == KeyCode.S)
+            splitBalls();
+        if (code == KeyCode.B)
+            makeBigPaddle();
     }
 
     private void handleMouseClick() {
@@ -185,11 +188,12 @@ public class GameMain extends Application {
                 case LASER: {
                     break;//FIX
                 }
-                case BALL_SPLIT: {
+                case SPLIT: {
+                    splitBalls();
                     break; //FIX
                 }
-                case OVERSIZE: {
-                    myPaddle.setWidth(myPaddle.getWidth() + myPaddle.DEFAULT_WIDTH / 2); // FIX make a timer
+                case BIG_PADDLE: {
+                    makeBigPaddle();
                 }
                 case POWER_SHOT:{
                     break; //FIX
@@ -200,6 +204,27 @@ public class GameMain extends Application {
         myPowerups.removeAll(caughtPowerups);
         //set boolean to eventually set ball velocity to 0 if power_shot
         //check to see if a power up fell way past the screen
+    }
+
+    private void splitBalls() {
+        ArrayList<Ball> newBalls = new ArrayList<>();
+        int[] xMult = {-1, -1, 1};
+        int[] yMult = {-1, 1, -1};
+        for (Ball ball : myBalls) {
+            for (int k=0; k<xMult.length; k++) {
+                Ball newBall = new Ball((int) ball.getX(),
+                                            (int) ball.getY(),
+                                       ball.getVelX() * xMult[k],
+                                       ball.getVelY() * yMult[k]);
+                getCurrentGameScene().addNodeToRoot(newBall.getImageView());
+                newBalls.add(newBall);
+            }
+        }
+        myBalls.addAll(newBalls);
+    }
+
+    private void makeBigPaddle() {
+        myPaddle.setWidth(myPaddle.getWidth() + myPaddle.DEFAULT_WIDTH / 2); // FIX make a timer
     }
 
     private void updateBlockAndFallingPowerups(Block blockHit) {

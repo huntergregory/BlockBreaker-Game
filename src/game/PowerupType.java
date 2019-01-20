@@ -8,8 +8,8 @@ import java.util.Random;
  */
 public enum PowerupType {
     LASER(0, "laserpower.gif"),
-    BALL_SPLIT(1, "extraballpower.gif"),
-    OVERSIZE(2, "sizepower.gif"),
+    SPLIT(1, "sizepower.gif"),
+    BIG_PADDLE(2, "extraballpower.gif"),
     POWER_SHOT(3, "pointspower.gif"); //renamed to power shot (not supercharge) to align with "p" on gif
 
     private int myId;
