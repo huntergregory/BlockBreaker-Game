@@ -7,7 +7,6 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -33,7 +32,7 @@ public class GameMain extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final int MAX_LIVES = 3;
     private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
-    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) };
+    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT)  };
     public static final int SPLASH_SCENE = 1;
     public static final int CUSTOM_SCENE = 0;
 
@@ -47,9 +46,9 @@ public class GameMain extends Application {
     private ArrayList<Ball> myBalls = new ArrayList<>();
     private ArrayList<Laser> myLasers = new ArrayList<>();
     private Paddle myPaddle;
-    private int blocksLeft; // FIX might not need this
     private boolean myGameIsPaused;
     private boolean myGameIsOver;
+    private boolean myCanShootLasers;
 
     /**
      * Initialize what will be displayed and how it will be updated.
@@ -116,6 +115,15 @@ public class GameMain extends Application {
             splitBalls();
         if (code == KeyCode.B)
             makeBigPaddle();
+        if (code == KeyCode.L)
+            addLasers();
+        if (code == KeyCode.SPACE)
+            if (myCanShootLasers) {
+                Laser laser = new Laser(myPaddle);
+                myLasers.add(laser);
+                getCurrentGameScene().addGameObjectToRoot(laser);
+            }
+
     }
 
     private void handleMouseClick() {
@@ -135,6 +143,7 @@ public class GameMain extends Application {
         animation.play();
     }
 
+    //FIX, REFACTOR, REDUCE SIMILARITY
     private void step (double elapsedTime) {
         if (myGameIsPaused)
             return;
@@ -142,23 +151,40 @@ public class GameMain extends Application {
             //FIX
         }
         else {
-            catchPowerups();
+            if (getCurrentGameScene() instanceof Level) {
+                Level currentLevel = (Level) getCurrentGameScene();
+                catchPowerups();
 
-            for (Powerup powerup : myFallingPowerups) {
-                powerup.updatePosition(elapsedTime);
+                ArrayList<Laser> destroyedLasers = new ArrayList<>();
+                for (Laser laser : myLasers) {
+                    laser.updatePosition(elapsedTime);
+                    Block blockHit = laser.getBlockHit(myBlocks);
+                    if (blockHit != null || laser.isOutOfBounds(currentLevel)) {
+                        destroyedLasers.add(laser);
+                        getCurrentGameScene().removeGameObjectFromRoot(laser);
+                        updateBlockAndFallingPowerups(blockHit);
+                    }
+                    safeDeleteBlock(laser.getBlockHit(myBlocks));
+                }
+                myLasers.removeAll(destroyedLasers);
+
+                for (Powerup powerup : myFallingPowerups) {
+                    powerup.updatePosition(elapsedTime);
+                }
+
+                for (Ball ball : myBalls) {
+                    ball.updatePosition(elapsedTime);
+                    Block blockHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
+                    updateBlockAndFallingPowerups(blockHit);
+                }
+                deleteBallsOutOfBounds();
+
+
+                if (myBlocks.size() - currentLevel.getNumIndestructibleBlocks() == 0)
+                    switchToScene(myNumScene + 1);
+                if (myBalls.size() == 0)
+                    loseLife();
             }
-
-            for (Ball ball : myBalls) {
-                ball.updatePosition(elapsedTime);
-                Block blockHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
-                updateBlockAndFallingPowerups(blockHit);
-            }
-            deleteBallsOutOfBounds();
-
-            if (myBlocks.size() == 0)
-                switchToScene(myNumScene + 1);
-            if (myBalls.size() == 0)
-                loseLife();
         }
     }
 
@@ -170,9 +196,10 @@ public class GameMain extends Application {
                 continue;
 
             caughtPowerups.add(powerup);
-            getCurrentGameScene().removeNodeFromRoot(powerup.getImageView());
+            getCurrentGameScene().removeGameObjectFromRoot(powerup);
             switch (powerup.getType()) {
                 case LASER: {
+                    addLasers();
                     break;//FIX
                 }
                 case SPLIT: {
@@ -190,7 +217,11 @@ public class GameMain extends Application {
         myFallingPowerups.removeAll(caughtPowerups);
         myPowerups.removeAll(caughtPowerups);
         //set boolean to eventually set ball velocity to 0 if power_shot
-        //check to see if a power up fell way past the screen
+        //check to see if a power up fell way past the screen <-- DELETE them
+    }
+
+    private void addLasers() {
+        myCanShootLasers = true;
     }
 
     private void splitBalls() {
@@ -199,11 +230,8 @@ public class GameMain extends Application {
         int[] yMult = {-1, 1, -1};
         for (Ball ball : myBalls) {
             for (int k=0; k<xMult.length; k++) {
-                Ball newBall = new Ball((int) ball.getX(),
-                                            (int) ball.getY(),
-                                       ball.getVelX() * xMult[k],
-                                       ball.getVelY() * yMult[k]);
-                getCurrentGameScene().addNodeToRoot(newBall.getImageView());
+                Ball newBall = new Ball(ball.getX(), ball.getY(),ball.getVelX() * xMult[k],ball.getVelY() * yMult[k]);
+                getCurrentGameScene().addGameObjectToRoot(newBall);
                 newBalls.add(newBall);
             }
         }
@@ -218,9 +246,15 @@ public class GameMain extends Application {
         if (blockHit == null)
             return;
         releasePowerup(blockHit);
+        safeDeleteBlock(blockHit);
+    }
+
+    private void safeDeleteBlock(Block blockHit) {
+        if (blockHit == null)
+            return;
         boolean blockStillAlive = blockHit.updateOnCollision();
         if (!blockStillAlive) {
-            getCurrentGameScene().removeNodeFromRoot(blockHit.getImageView());
+            getCurrentGameScene().removeGameObjectFromRoot(blockHit);
             myBlocks.remove(blockHit);
         }
     }
@@ -241,7 +275,7 @@ public class GameMain extends Application {
                 if (myBalls.size() == 1)
                     ball.halt();
                 else
-                    getCurrentGameScene().removeNodeFromRoot(ball.getImageView());
+                    getCurrentGameScene().removeGameObjectFromRoot(ball);
 
                 outOfBoundsBalls.add(ball);
             }

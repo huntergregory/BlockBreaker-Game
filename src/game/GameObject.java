@@ -34,6 +34,18 @@ public abstract class GameObject {
     }
 
     /**
+     * @param gameScene
+     * @return true if GameObject has left the boundaries of the Scene
+     */
+    public boolean isOutOfBounds(GameScene gameScene) {
+        int buffer = 5; //in case an object temporarily overshoots the boundaries
+        return this.getX() <= -buffer
+                || this.getX() + this.getWidth() >= gameScene.getAssignedWidth() + buffer
+                || this.getY() <= -buffer
+                || this.getY() + this.getHeight() >+ gameScene.getCurrentHeight() + buffer;
+    }
+
+    /**
      * Updates the image of the ImageView
      * @param imageName
      */

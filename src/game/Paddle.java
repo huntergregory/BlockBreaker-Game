@@ -12,7 +12,7 @@ public class Paddle extends GameObject {
     /**
      * Create a game.Paddle with an empty, rounded rectangle
      */
-    public Paddle(int x, int y) {
+    public Paddle(double x, double y) {
         super(IMAGE_NAME, DEFAULT_WIDTH, HEIGHT);
         this.setX(x);
         this.setY(y);

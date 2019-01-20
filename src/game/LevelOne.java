@@ -3,7 +3,6 @@ package game;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -23,8 +22,9 @@ public class LevelOne extends Level {
     private final int DISTANCE_FROM_TOP = 3;    // in Block.HEIGHT units
     private final int DISTANCE_FROM_BOTTOM = 15; // in Block.HEIGHT units
 
-    private int myNumRows;
-    private int myNumCols;
+    private int myNumRows = 0;
+    private int myNumCols = 0;
+    private int myNumIndestructibleBlocks = 0;
 
     public LevelOne(int width, int height) { this(width, height, Color.WHITE, new Random()); }
 
@@ -122,10 +122,10 @@ public class LevelOne extends Level {
 
     private void addAllToRoot() {
         for (Block block : myBlockConfiguration) {
-            addNodeToRoot(block.getImageView());
+            addGameObjectToRoot(block);
         }
         for (Powerup powerup : myPowerupConfiguration) {
-            addNodeToRoot(powerup.getImageView());
+            addGameObjectToRoot(powerup);
         }
     }
 }

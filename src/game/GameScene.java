@@ -1,7 +1,6 @@
 package game;
 
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.paint.Paint;
 
@@ -29,19 +28,19 @@ public class GameScene {
     }
 
     /**
-     * Add a node to the children of the scene's root
-     * @param node
+     * Add a GameObject to the children of the scene's root
+     * @param gameObject
      */
-    public void addNodeToRoot(Node node) {
-       myRoot.getChildren().add(node);
+    public void addGameObjectToRoot(GameObject gameObject) {
+       myRoot.getChildren().add(gameObject.getImageView());
     }
 
     /**
-     * Remove a node from the children of the scene's root
-     * @param node
+     * Remove a GameObject from the children of the scene's root
+     * @param gameObject
      */
-    public void removeNodeFromRoot(Node node) {
-        myRoot.getChildren().remove(node);
+    public void removeGameObjectFromRoot(GameObject gameObject) {
+        myRoot.getChildren().remove(gameObject.getImageView());
     }
 
     /**

@@ -50,7 +50,7 @@ public abstract class Level extends GameScene {
         ArrayList<Ball> list = new ArrayList<>();
         Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
         list.add(ball);
-        addNodeToRoot(ball.getImageView());
+        addGameObjectToRoot(ball);
         return list;
     }
 
@@ -61,12 +61,18 @@ public abstract class Level extends GameScene {
     protected Paddle resetAndGetPaddle() {
         Paddle paddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
                 myAssignedHeight - Paddle.HEIGHT - 2);
-        addNodeToRoot(paddle.getImageView());
+        addGameObjectToRoot(paddle);
         return paddle;
     }
 
     /**
      * @return Pauser for the Level's Scene
      */
-    public  Pauser getPauser() { return myPauser; }
+    protected Pauser getPauser() { return myPauser; }
+
+    /**
+     * Override in subclass if Level uses indestructible blocks
+     * @return numBlocks
+     */
+    protected int getNumIndestructibleBlocks() { return 0; }
 }

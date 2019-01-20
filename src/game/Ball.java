@@ -32,7 +32,7 @@ public class Ball extends GameObject implements Movable {
      * @param velX
      * @param velY
      */
-    public Ball(int x, int y, int velX, int velY) {
+    public Ball(double x, double y, int velX, int velY) {
         super(IMAGE_NAME, WIDTH, HEIGHT);
         this.setX(x);
         this.setY(y);
