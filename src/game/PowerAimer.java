@@ -16,6 +16,8 @@ public class PowerAimer {
     public static final int WIDTH = 1;
     public static final int HEIGHT = 30;
     public static final int ROTATE_DELTA = 5;
+    public static final int MAX_ANGLE = 45;
+    public static final int MIN_ANGLE = -45;
 
     private Rectangle myRect;
     private Rotate myRotate;
@@ -68,7 +70,8 @@ public class PowerAimer {
      * Rotate the ball aimer towards the right
      */
     public void rotateClockwise() {
-        myAngle += ROTATE_DELTA;
+        if (myAngle < MAX_ANGLE)
+            myAngle += ROTATE_DELTA;
         myRotate.setAngle(myAngle);
         //FIX, prevent from rotating below 15 deg. above horizontal
     }
@@ -77,9 +80,9 @@ public class PowerAimer {
      * Rotate the ball aimer towards the left
      */
     public void rotateCounterClockwise() {
-        myAngle -= ROTATE_DELTA;
+        if (myAngle > MIN_ANGLE)
+            myAngle -= ROTATE_DELTA;
         myRotate.setAngle(myAngle);
-        //FIX, prevent from rotating below 15 deg. above horizontal
     }
 
     /**
@@ -88,6 +91,7 @@ public class PowerAimer {
     public void fire() {
         myRoot.getChildren().remove(myRect);
         myBall.unhaltWithMaxVelocity(myAngle);
+        myAngle = 0;
         myPowerShotIsOn = false;
         myIsCurrentlyAiming = false;
     }

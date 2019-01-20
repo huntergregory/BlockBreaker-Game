@@ -14,13 +14,13 @@ public class Laser extends GameObject implements Movable {
 
     /**
      * Create a Laser
-     * @param x
-     * @param y
+     * @param x position
+     * @param y position
      */
-    public Laser(Paddle paddle) {
+    public Laser(double x, double y) {
         super(IMAGE_NAME,WIDTH,HEIGHT);
-        this.setX(paddle.getX() + paddle.getWidth() / 2);
-        this.setY(paddle.getY());
+        this.setX(x);
+        this.setY(y);
     }
 
     @Override

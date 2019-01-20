@@ -127,10 +127,8 @@ public class Ball extends GameObject implements Movable {
      */
     public void unhaltWithMaxVelocity(double angle) {
         myVelY = -MAX_VEL;
-        double tangent = Math.tan(angle) * -myVelY;
-        myVelX = (int) tangent;
-        System.out.println(tangent);
-        System.out.println(myVelX);
+        int tangent = (int) (Math.tan(Math.abs(Math.toRadians(angle))) * Math.abs(myVelY));
+        myVelX = (angle >= 0) ? tangent : -tangent;
         myIsHalted = false;
     }
 
