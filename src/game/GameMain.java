@@ -15,12 +15,12 @@ import java.util.ArrayList;
 /**
  A variant of the classic game Breakout, inspired by the original and its
  descendant - Brick Breaker.
- This class has large dependencies on SceneManager which will do the following for GameMain:
-  - store all scenes, levels, and roots
-  - initiate and manage the splash scene and customization scene entirely
-  - switch between scenes and keep track of current scene and root
-  - reset and return balls, paddles, and blocks
- GameMain must manage all ball, paddle, block updates as well as user input within levels.
+ Stores all GameScenes, keeps track of current GameScene.
+ Delegates management of levels to two entities:
+    1. LevelHandler, which takes care of keyboard and mouse input.
+    2. the Level abstract class, which manages all GameObjects within its GameScene.
+ GameMain is in charge of running the Application, resetting Levels, and switching between all GameScenes.
+
  @author Hunter Gregory
  */
 public class GameMain extends Application {
@@ -32,6 +32,7 @@ public class GameMain extends Application {
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final int MAX_LIVES = 3;
     private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
+
     public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT)  };
     public static final int SPLASH_SCENE = 1;
     public static final int CUSTOM_SCENE = 0;
@@ -39,15 +40,8 @@ public class GameMain extends Application {
 
     private Stage myStage;
     private int myNumScene;
-    private int myLives = MAX_LIVES;
-    private ArrayList<Block> myBlocks = new ArrayList<>();
-    private ArrayList<Powerup> myPowerups = new ArrayList<>();
-    private ArrayList<Powerup> myFallingPowerups = new ArrayList<>();
-    private ArrayList<Ball> myBalls = new ArrayList<>();
-    private ArrayList<Laser> myLasers = new ArrayList<>();
-    private Paddle myPaddle;
-    private boolean myGameIsPaused;
-    private boolean myGameIsOver;
+    private int myLives;
+    private LevelHandler myLevelHandler;
 
     /**
      * Initialize what will be displayed and how it will be updated.
@@ -56,7 +50,10 @@ public class GameMain extends Application {
     @Override
     public void start (Stage stage) {
         myStage = stage;
+        myLives = MAX_LIVES;
+        myLevelHandler = null;
         switchToScene(SPLASH_SCENE);
+
         myStage.setScene(getCurrentGameScene().getScene());
         myStage.setTitle(TITLE);
         myStage.show();
@@ -64,58 +61,33 @@ public class GameMain extends Application {
         attachGameLoopAndPlay();
     }
 
-    private void switchToScene(int numScene) {
-        myNumScene = numScene;
-        if (getCurrentGameScene() instanceof Level) {
-            assignLevelComponents();
-            addEventListeners();
-        }
-        //else //FIX
-    }
-
     private GameScene getCurrentGameScene() {
         return GAME_SCENES[myNumScene];
     }
 
-    private void assignLevelComponents() {
-        Level currentLevel = (Level) getCurrentGameScene();
-        myBlocks = currentLevel.getBlocks();
-        myPowerups = currentLevel.getPowerups();
-        myBalls = currentLevel.resetAndGetBalls();
-        myPaddle = currentLevel.resetAndGetPaddle();
+    private boolean currentGameSceneIsLevel() {
+        return getCurrentGameScene() instanceof Level;
     }
 
-    private void addEventListeners() {
-        Scene currentScene = getCurrentGameScene().getScene();
-        currentScene.setOnKeyPressed(e -> handleKeyInput(e.getCode()));
-        currentScene.setOnMouseClicked(e -> handleMouseClick());
+    private Level getCurrentLevel() {
+        return (Level) getCurrentGameScene();
     }
 
-    private void handleKeyInput(KeyCode code) {
-        if (myGameIsOver || myGameIsPaused)
-            return;
-        myPaddle.handleOfficialCodes(code, getCurrentGameScene(), myLasers);
-        handleCheatCodes(code);
-    }
-
-    private void handleCheatCodes(KeyCode code) {
-        if (code == KeyCode.S)
-            splitBalls();
-        if (code == KeyCode.B)
-            myPaddle.makeBig();
-        if (code == KeyCode.L)
-            myPaddle.setCanShootLasers(true);
-        if (code == KeyCode.P)
-            myPaddle.initPowerShot();
-    }
-
-    private void handleMouseClick() {
-        if (myGameIsOver || !(getCurrentGameScene() instanceof Level))
-            return;
-
-        myGameIsPaused = !myGameIsPaused;
-        Level currentLevel = (Level) getCurrentGameScene();
-        currentLevel.getPauser().togglePause(myGameIsPaused);
+    private void switchToScene(int numScene) {
+        if (numScene >= GAME_SCENES.length || numScene < 0)
+            myNumScene = SPLASH_SCENE;
+        else {
+            myNumScene = numScene;
+            if (currentGameSceneIsLevel()) {
+                getCurrentLevel().resetLevel();
+                getCurrentLevel().setLives(myLives);
+                myLevelHandler = new LevelHandler(getCurrentLevel());
+            }
+            else {
+                myLevelHandler = null;
+                //FIX, addEventListeners();
+            }
+        }
     }
 
     private void attachGameLoopAndPlay() {
@@ -128,147 +100,24 @@ public class GameMain extends Application {
 
     //FIX, REFACTOR, REDUCE SIMILARITY
     private void step (double elapsedTime) {
-        if (myGameIsPaused)
-            return;
-        if (myGameIsOver) {
-            //FIX
-        }
-        else {
-            if (getCurrentGameScene() instanceof Level) {
-                Level currentLevel = (Level) getCurrentGameScene();
-                catchPowerups();
-
-                ArrayList<Laser> destroyedLasers = new ArrayList<>();
-                for (Laser laser : myLasers) {
-                    laser.updatePosition(elapsedTime);
-                    Block blockHit = laser.getBlockHit(myBlocks);
-                    if (blockHit != null || laser.isOutOfBounds(currentLevel)) {
-                        destroyedLasers.add(laser);
-                        getCurrentGameScene().removeGameObjectFromRoot(laser);
-                        updateBlockAndFallingPowerups(blockHit);
-                    }
-                    safeDeleteBlock(laser.getBlockHit(myBlocks));
-                }
-                myLasers.removeAll(destroyedLasers);
-
-                for (Powerup powerup : myFallingPowerups) {
-                    powerup.updatePosition(elapsedTime);
-                }
-
-                for (Ball ball : myBalls) {
-                    ball.updatePosition(elapsedTime);
-                    Block blockHit = ball.reflectOffAnyObstacles((Level) getCurrentGameScene(), myPaddle, myBlocks);
-                    updateBlockAndFallingPowerups(blockHit);
-                    if (myPaddle.getAimer().getPowerShotIsOn() && !myPaddle.getAimer().getIsCurrentlyAiming() && ball.hitGameObject(myPaddle)) {
-                        myPaddle.getAimer().activate(getCurrentGameScene().getRoot(), ball);
-                    }
-                }
-                deleteBallsOutOfBounds();
-
-
-                if (myBlocks.size() - currentLevel.getNumIndestructibleBlocks() == 0)
-                    switchToScene(myNumScene + 1);
-                if (myBalls.size() == 0)
-                    loseLife();
-            }
-        }
-    }
-
-    //FIX, all need timers
-    private void catchPowerups() {
-        ArrayList<Powerup> caughtPowerups = new ArrayList<>();
-        for (Powerup powerup : myFallingPowerups) {
-            if (!powerup.hitGameObject(myPaddle))
-                continue;
-
-            caughtPowerups.add(powerup);
-            getCurrentGameScene().removeGameObjectFromRoot(powerup);
-            switch (powerup.getType()) {
-                case LASER: {
-                    myPaddle.setCanShootLasers(true);
-                    break;
-                }
-                case SPLIT: {
-                    splitBalls();
-                    break; //FIX
-                }
-                case BIG_PADDLE: {
-                    myPaddle.makeBig();
-                }
-                case POWER_SHOT:{
-                    myPaddle.initPowerShot();
-                    break; //FIX
-                }
-            }
-        }
-        myFallingPowerups.removeAll(caughtPowerups);
-        myPowerups.removeAll(caughtPowerups);
-        //set boolean to eventually set ball velocity to 0 if power_shot
-        //check to see if a power up fell way past the screen <-- DELETE them
-    }
-
-    //FIX, add timer
-    private void splitBalls() {
-        if (myPaddle.getAimer().getIsCurrentlyAiming())
-            return;
-        ArrayList<Ball> newBalls = new ArrayList<>();
-        int[] xMult = {-1, -1, 1};
-        int[] yMult = {-1, 1, -1};
-        for (Ball ball : myBalls) {
-            for (int k=0; k<xMult.length; k++) {
-                Ball newBall = new Ball(ball.getX(), ball.getY(),ball.getVelX() * xMult[k],ball.getVelY() * yMult[k]);
-                getCurrentGameScene().addGameObjectToRoot(newBall);
-                newBalls.add(newBall);
-            }
-        }
-        myBalls.addAll(newBalls);
-    }
-
-    private void updateBlockAndFallingPowerups(Block blockHit) {
-        if (blockHit == null)
-            return;
-        releasePowerup(blockHit);
-        safeDeleteBlock(blockHit);
-    }
-
-    private void safeDeleteBlock(Block blockHit) {
-        if (blockHit == null)
-            return;
-        boolean blockStillAlive = blockHit.updateOnCollision();
-        if (!blockStillAlive) {
-            getCurrentGameScene().removeGameObjectFromRoot(blockHit);
-            myBlocks.remove(blockHit);
-        }
-    }
-
-    private void releasePowerup(Block block) {
-        for (Powerup powerup : myPowerups) {
-            if (powerup.isWithinAlpha(block)) {
-                powerup.setIsHidden(false);
-                myFallingPowerups.add(powerup);
-            }
-        }
-    }
-
-    private void deleteBallsOutOfBounds() {
-        ArrayList<Ball> outOfBoundsBalls = new ArrayList<>();
-        for (Ball ball : myBalls) {
-            if (ball.hitFloor(getCurrentGameScene())) {
-                if (myBalls.size() == 1)
-                    ball.halt();
+        if (currentGameSceneIsLevel())
+            if (getCurrentLevel().getBlocksLeft() == 0)
+                switchToScene(myNumScene + 1);
+            else {
+                myLives = getCurrentLevel().getLives();
+                if (myLives == 0)
+                    endGame();
                 else
-                    getCurrentGameScene().removeGameObjectFromRoot(ball);
-
-                outOfBoundsBalls.add(ball);
+                    getCurrentLevel().step(elapsedTime);
             }
+        else {
+            return; //FIX
         }
-        myBalls.removeAll(outOfBoundsBalls);
     }
 
-    private void loseLife() {
-        myLives -= 1;
-        if (myLives == 0)
-            myGameIsOver = true;
+    private void endGame() {
+        //FIX, need to stop LevelHandler if GAME IS OVER
+        //FIX, add more
     }
 
     public static void main(String[] args) {

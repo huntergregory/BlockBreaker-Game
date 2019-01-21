@@ -30,7 +30,7 @@ public class Laser extends GameObject implements Movable {
 
     /**
      * @param list of Blocks
-     * @return Block hit by laser
+     * @return Block hit by Laser
      */
     public Block getBlockHit(ArrayList<Block> list) {
         for (Block block : list) {

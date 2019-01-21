@@ -16,6 +16,7 @@ public class Pauser {
     private int myWidth;
     private int myHeight;
     private Group myRoot;
+    private boolean myIsPaused;
 
     /**
      * Create a Pauser for a Scene
@@ -39,10 +40,11 @@ public class Pauser {
 
     /**
      * Add or remove pause symbols
-     * @param isPaused
+     * @param bool
      */
-    public void togglePause(boolean isPaused) {
-        if (isPaused) {
+    public void setIsPaused(boolean bool) {
+        myIsPaused = bool;
+        if (bool) {
             myRoot.getChildren().add(myPauseRect1);
             myRoot.getChildren().add(myPauseRect2);
         }
@@ -51,4 +53,9 @@ public class Pauser {
             myRoot.getChildren().remove(myPauseRect2);
         }
     }
+
+    /**
+     * @return true if Pause status is on
+     */
+    public boolean getIsPaused() { return myIsPaused; }
 }

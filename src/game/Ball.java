@@ -1,5 +1,6 @@
 package game;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -46,27 +47,45 @@ public class Ball extends GameObject implements Movable {
     }
 
     /**
-     * Updates the velocity of the ball
-     * @param level
-     * @param paddle
-     * @return ArrayList of Blocks hit
+     * Update velocity of ball upon collision with wall
+     * @param sceneWidth
+     * @param sceneHeight
      */
-    public Block reflectOffAnyObstacles(Level level, Paddle paddle, ArrayList<Block> blocks) {
-        reflectOffWall(level);
-        reflectOffPaddle(paddle);
-        return reflectOffBlock(blocks);
-    }
-
-    private void reflectOffWall(Level level) {
-        if (this.getY() <= 0 || this.getY() + HEIGHT >= level.getCurrentHeight())
+    public void reflectOffWall(double sceneWidth, double sceneHeight) {
+        if (this.getY() <= 0 || this.getY() + HEIGHT >= sceneWidth)
             this.multiplyVelY(-1);
 
-        if (this.getX() <= 0 || this.getX() + WIDTH >= level.getCurrentWidth())
+        if (this.getX() <= 0 || this.getX() + WIDTH >= sceneHeight)
             this.multiplyVelX(-1);
     }
 
-    private Block reflectOffBlock(ArrayList<Block> list) {
-        for (Block block : list) {
+    /**
+     * Update velocity of ball upon collision with Paddle
+     * @param paddle
+     */
+    public void reflectOffPaddle(Paddle paddle) {
+        if (!this.hitGameObject(paddle))
+            return;
+
+        int thirdOfWidth = (int) (paddle.getWidth() / 3);
+        boolean hitLeftThird = this.getX() < paddle.getX() + thirdOfWidth;
+        boolean hitRightThird = this.getX() > paddle.getX() + 2 * thirdOfWidth;
+        double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
+
+        this.multiplyVelY(-1 * multiplier);
+
+        if (hitLeftThird && myVelX > 0 || hitRightThird && myVelX <= 0)
+            multiplier *= -1;
+        this.multiplyVelX(multiplier);
+    }
+
+    /**
+     * Update the velocity of ball upon collision with Block
+     * @param blocks
+     * @return block hit
+     */
+    public Block reflectOffBlock(ArrayList<Block> blocks) {
+        for (Block block : blocks) {
             if (!this.hitGameObject(block))
                 continue;
             double multiplier = block.getMultiplier();
@@ -82,22 +101,6 @@ public class Ball extends GameObject implements Movable {
     private boolean isVerticalCollision(Block block) {
         double centerX = this.getX() + WIDTH / 2;
         return block.getX() < centerX && centerX < block.getX() + block.getWidth();
-    }
-
-    private void reflectOffPaddle(Paddle paddle) {
-        if (!this.hitGameObject(paddle))
-            return;
-
-        int thirdOfWidth = (int) (paddle.getWidth() / 3);
-        boolean hitLeftThird = this.getX() < paddle.getX() + thirdOfWidth;
-        boolean hitRightThird = this.getX() > paddle.getX() + 2 * thirdOfWidth;
-        double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
-
-        this.multiplyVelY(-1 * multiplier);
-
-        if (hitLeftThird && myVelX > 0 || hitRightThird && myVelX <= 0)
-            multiplier *= -1;
-        this.multiplyVelX(multiplier);
     }
 
     private void multiplyVelX(double multiplier) {
@@ -141,8 +144,24 @@ public class Ball extends GameObject implements Movable {
         myIsHalted = true;
     }
 
-    public boolean hitFloor(GameScene gameScene) {
-        return this.getY() + HEIGHT >= gameScene.getCurrentHeight();
+    /**
+     * @param list of Blocks
+     * @return Block hit by Ball
+     */
+    public Block getBlockHit(ArrayList<Block> list) {
+        for (Block block : list) {
+            if (this.hitGameObject(block))
+                return block;
+        }
+        return null;
+    }
+
+    /**
+     * @param sceneHeight
+     * @return true if Ball hit the floor of the Scene
+     */
+    public boolean didHitFloor(double sceneHeight) {
+        return this.getY() + HEIGHT >= sceneHeight;
     }
 
     /**

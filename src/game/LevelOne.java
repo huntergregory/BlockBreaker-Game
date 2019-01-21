@@ -24,7 +24,6 @@ public class LevelOne extends Level {
 
     private int myNumRows = 0;
     private int myNumCols = 0;
-    private int myNumIndestructibleBlocks = 0;
 
     public LevelOne(int width, int height) { this(width, height, Color.WHITE, new Random()); }
 
@@ -78,13 +77,13 @@ public class LevelOne extends Level {
         for (int r = 0; r< myNumRows; r++) {
             for (int c = 0; c< myNumCols; c++) {
                 if (isAlphaBlockLocation(r,c)) {
-                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.ALPHA));
+                    getBlockConfiguration().add(new Block(xCurrent, yCurrent, BlockType.ALPHA));
                 }
                 else if (isBetaBlockLocation(r,c)) {
-                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.BETA));
+                    getBlockConfiguration().add(new Block(xCurrent, yCurrent, BlockType.BETA));
                 }
                 else {
-                    myBlockConfiguration.add(new Block(xCurrent, yCurrent, BlockType.GAMMA));
+                    getBlockConfiguration().add(new Block(xCurrent, yCurrent, BlockType.GAMMA));
                 }
                 xCurrent += Block.WIDTH + SEPARATION_DISTANCE;
             }
@@ -107,24 +106,24 @@ public class LevelOne extends Level {
     //assumes there are at least NUM_POWERUPS blocks in myBlockConfiguration
     private void initializePowerups() {
         HashSet<Integer> indices = new HashSet<>();
-        while (myPowerupConfiguration.size() < NUM_POWERUPS) {
+        while (getPowerupConfiguration().size() < NUM_POWERUPS) {
             var powerup = Powerup.getRandomPowerup();
-            Integer randIndex = myRand.nextInt(myBlockConfiguration.size());
+            Integer randIndex = getRand().nextInt(getBlockConfiguration().size());
             if (indices.contains(randIndex))
                 continue;
-            Block correspondingBlock = myBlockConfiguration.get(randIndex);
+            Block correspondingBlock = getBlockConfiguration().get(randIndex);
             powerup.setX(correspondingBlock.getX() + ((Block.WIDTH - Powerup.WIDTH) / 2));
             powerup.setY(correspondingBlock.getY() + ((Block.HEIGHT - Powerup.HEIGHT) / 2));
-            myPowerupConfiguration.add(powerup);
+            getPowerupConfiguration().add(powerup);
             indices.add(randIndex);
         }
     }
 
     private void addAllToRoot() {
-        for (Block block : myBlockConfiguration) {
+        for (Block block : getBlockConfiguration()) {
             addGameObjectToRoot(block);
         }
-        for (Powerup powerup : myPowerupConfiguration) {
+        for (Powerup powerup : getPowerupConfiguration()) {
             addGameObjectToRoot(powerup);
         }
     }

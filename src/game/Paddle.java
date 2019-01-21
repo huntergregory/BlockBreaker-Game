@@ -1,5 +1,6 @@
 package game;
 
+import javafx.scene.Group;
 import javafx.scene.input.KeyCode;
 
 import java.util.ArrayList;
@@ -27,51 +28,12 @@ public class Paddle extends GameObject {
         myAimer = new PowerAimer();
     }
 
-    /**
-     * Handles multiple keyboard inputs for the Paddle and its PowerAimer, and adds Lasers to the
-     * GameScene and specified list of Lasers if necessary. Action taken only if gameScene is a Level
-     * @param code
-     * @param gameScene
-     * @param lasers
-     */
-    public void handleOfficialCodes(KeyCode code, GameScene gameScene, ArrayList<Laser> lasers) {
-        if (!(gameScene instanceof Level))
-            return;
-        handleAimer(code);
-        handleMovement(code, gameScene);
-        handleAddingLaser(code, gameScene, lasers);
-    }
-
-    private void handleAimer(KeyCode code) {
-        if (!this.getAimer().getIsCurrentlyAiming())
-            return;
-        if (code == KeyCode.RIGHT) {
-            this.getAimer().rotateClockwise();
-        }
-        if (code == KeyCode.LEFT) {
-            this.getAimer().rotateCounterClockwise();
-        }
-        if (code == KeyCode.SPACE) {
-            this.getAimer().fire();
-        }
-    }
-
-    private void handleMovement(KeyCode code, GameScene gameScene) {
-        boolean isAiming = this.getAimer().getIsCurrentlyAiming();
-        if (code == KeyCode.RIGHT && !isAiming && this.getX() + this.getWidth() < gameScene.getAssignedWidth())
-            this.setX(this.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
-        if (code == KeyCode.LEFT && !isAiming && this.getX() > 0)
-            this.setX(this.getX() - Paddle.SPEED); //same as above
-    }
-
-    private void handleAddingLaser(KeyCode code, GameScene gameScene, ArrayList<Laser> lasers) {
-        if (code == KeyCode.SPACE) {
-            if (this.getCanShootLasers()) {
-                Laser laser = new Laser(this.getX() + this.getWidth() / 2, this.getY());
-                lasers.add(laser);
-                gameScene.addGameObjectToRoot(laser);
-            }
-        }
+    public void activateIfPowerShot(Group root, Ball ball) {
+        boolean shouldActivate = this.getAimer().getPowerShotIsOn()
+                && !this.getAimer().getIsCurrentlyAiming()
+                && this.hitGameObject(ball);
+        if (shouldActivate)
+            this.getAimer().activate(root, ball);
     }
 
     /**

@@ -14,65 +14,323 @@ public abstract class Level extends GameScene {
     public static final int SEPARATION_DISTANCE = 5;
     public static final int NUM_POWERUPS = 5;
 
-    ArrayList<Block> myBlockConfiguration;
-    ArrayList<Powerup> myPowerupConfiguration;
-    Random myRand;
-    Pauser myPauser;
+    private ArrayList<Block> myBlockConfiguration;     //implement algorithm to configure in subclass
+    private ArrayList<Powerup> myPowerupConfiguration; //implement algorithm to configure in subclass
+    private ArrayList<Block> myBlocks;
+    private ArrayList<Block> myIndestructibleBlocks;
+    private ArrayList<Powerup> myPowerups;
+    private ArrayList<Powerup> myFallingPowerups;
+    private ArrayList<Ball> myBalls;
+    private ArrayList<Laser> myLasers;
+    private Paddle myPaddle;
+    private Random myRand;
+    private Pauser myPauser;
+    private int myLives;
+    //private StatusDisplay myDisplay; //FIX
 
 
-    public Level(int width, int height) {
+    /**
+     * Create a Level with default white Background and default random seed.
+     * @param width
+     * @param height
+     */
+    protected Level(int width, int height) {
         this(width, height, Color.WHITE, new Random());
     }
 
-    public Level(int width, int height, Paint backgroundColor, Random rand) {
+    /**
+     * Create Level with specified background color and random seed.
+     * @param width
+     * @param height
+     * @param backgroundColor
+     * @param rand
+     */
+    protected Level(int width, int height, Paint backgroundColor, Random rand) {
         super(width, height, backgroundColor);
         myRand = rand;
         myBlockConfiguration = new ArrayList<>();
         myPowerupConfiguration = new ArrayList<>();
+        myBlocks = new ArrayList<>();
+        myIndestructibleBlocks = new ArrayList<>();
+        myPowerups = new ArrayList<>();
+        myFallingPowerups = new ArrayList<>();
+        myBalls = new ArrayList<>();
+        myLasers = new ArrayList<>();
+        myPaddle = null;
         myPauser = new Pauser(myAssignedWidth, myAssignedHeight, myRoot);
+        myLives = 0;
     }
+
+     /*
+    ------------------------------------------------
+                    Reset Methods
+    ------------------------------------------------
+     */
+    /**
+     * Equivalent to calling resetBlocksAndPowerups() and then resetPaddleAndBalls()
+     */
+    protected void resetLevel() {
+        resetBlocksAndPowerups();
+        resetPaddleAndBalls();
+    }
+
+    /**
+     * Resets blocks and powerups to their respective configurations.
+     */
+    protected void resetBlocksAndPowerups() {
+        myBlocks = myBlockConfiguration;
+        myPowerups = myPowerupConfiguration;
+    }
+
+    /**
+     * Creates a new Paddle and new list of one Ball, each in their default positions.
+     * Call at the beginning of a new Level or when restarting after losing a life.
+     */
+    protected void resetPaddleAndBalls() {
+        myBalls = new ArrayList<>();
+        Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
+        myBalls.add(ball);
+        this.addGameObjectToRoot(ball);
+
+        myPaddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
+                                    myAssignedHeight - Paddle.HEIGHT - 2);
+        this.addGameObjectToRoot(myPaddle);
+    }
+
+    /*
+    ------------------------------------------------
+                    Mutator Methods
+    ------------------------------------------------
+     */
+
+    /**
+     * Update all instance variables to animate
+     * @param elapsedTime
+     */
+    protected void step(double elapsedTime) {
+        if (myLives == 0)
+            return;
+
+        for (Powerup powerup : myPowerups)
+            powerup.updatePosition(elapsedTime);
+
+        for (Laser laser : myLasers)
+            laser.updatePosition(elapsedTime);
+
+        for (Ball ball : myBalls)
+            ball.updatePosition(elapsedTime);
+
+        catchPowerups();
+        reflectBallsOffObstacles();
+        deleteBlocksHitByBalls();
+        deleteBlocksHitByLasers();
+        deleteLasers();
+        deleteBallsOutOfBounds();
+        if (getBlocksLeft() == 0)
+            setLives(myLives - 1);
+    }
+
+
+    //FIX, all but split need timers
+    private void catchPowerups() {
+        ArrayList<Powerup> caughtPowerups = new ArrayList<>();
+        for (Powerup powerup : myFallingPowerups) {
+            if (!powerup.hitGameObject(myPaddle))
+                continue;
+
+            caughtPowerups.add(powerup);
+            this.removeGameObjectFromRoot(powerup);
+            switch (powerup.getType()) {
+                case LASER: {
+                    myPaddle.setCanShootLasers(true);
+                    break;
+                }
+                case SPLIT: {
+                    splitBalls();
+                    break; //FIX
+                }
+                case BIG_PADDLE: {
+                    myPaddle.makeBig();
+                }
+                case POWER_SHOT:{
+                    myPaddle.initPowerShot();
+                    break; //FIX
+                }
+            }
+        }
+        myFallingPowerups.removeAll(caughtPowerups);
+        myPowerups.removeAll(caughtPowerups);
+        //set boolean to eventually set ball velocity to 0 if power_shot
+        //check to see if a power up fell way past the screen <-- DELETE them
+    }
+
+    protected void splitBalls() {
+        if (myPaddle.getAimer().getIsCurrentlyAiming())
+            return;
+        ArrayList<Ball> newBalls = new ArrayList<>();
+        int[] xMult = {-1, -1, 1};
+        int[] yMult = {-1, 1, -1};
+        for (Ball ball : myBalls) {
+            for (int k=0; k<xMult.length; k++) {
+                Ball newBall = new Ball(ball.getX(), ball.getY(),ball.getVelX() * xMult[k],ball.getVelY() * yMult[k]);
+                this.addGameObjectToRoot(newBall);
+                newBalls.add(newBall);
+            }
+        }
+        myBalls.addAll(newBalls);
+    }
+
+    private void reflectBallsOffObstacles() {
+        for (Ball ball : myBalls) {
+            ball.reflectOffWall(this.getAssignedWidth(), this.getAssignedHeight());
+            ball.reflectOffPaddle(myPaddle);
+            ball.reflectOffBlock(myBlocks);
+            myPaddle.activateIfPowerShot(this.getRoot(), ball);
+        }
+    }
+
+    private void deleteBlocksHitByBalls() {
+        for (Ball ball : myBalls) {
+            Block blockHit = ball.getBlockHit(myBlocks);
+            updateBlockAndPowerup(blockHit);
+        }
+    }
+    private void deleteBlocksHitByLasers() {
+        for (Laser laser : myLasers) {
+            Block blockHit = laser.getBlockHit(myBlocks);
+            updateBlockAndPowerup(blockHit);
+        }
+    }
+
+    private void updateBlockAndPowerup(Block blockHit) {
+        if (blockHit != null) {
+            releasePowerup(blockHit);
+            safeDeleteBlock(blockHit);
+        }
+    }
+
+    private void releasePowerup(Block block) {
+        for (Powerup powerup : myPowerups) {
+            if (powerup.isWithinAlpha(block)) {
+                powerup.setIsHidden(false);
+                myFallingPowerups.add(powerup);
+            }
+        }
+    }
+
+    private void safeDeleteBlock(Block blockHit) {
+        boolean blockStillAlive = blockHit.updateOnCollision();
+        if (!blockStillAlive) {
+            this.removeGameObjectFromRoot(blockHit);
+            myBlocks.remove(blockHit);
+        }
+    }
+
+    private void deleteLasers() {
+        ArrayList<Laser> destroyedLasers = new ArrayList<>();
+        for (Laser laser : myLasers) {
+            Block blockHit = laser.getBlockHit(myBlocks);
+            if (blockHit != null) {
+                destroyedLasers.add(laser);
+                this.removeGameObjectFromRoot(laser);
+            }
+        }
+        myLasers.removeAll(destroyedLasers);
+    }
+
+    private void deleteBallsOutOfBounds() {
+        ArrayList<Ball> outOfBoundsBalls = new ArrayList<>();
+        for (Ball ball : myBalls) {
+            if (ball.didHitFloor(this.getAssignedHeight())) { //Should this be current height?
+                this.removeGameObjectFromRoot(ball);
+                outOfBoundsBalls.add(ball);
+            }
+        }
+        myBalls.removeAll(outOfBoundsBalls);
+    }
+
+    /*
+    ------------------------------------------------
+                    Getter Methods
+    ------------------------------------------------
+     */
+
+    /**
+     * @return number of lives left
+     */
+    protected int getLives() { return myLives; }
+
+    /**
+     * @return list of Blocks in Level's initial configuration
+     */
+    protected ArrayList<Block> getBlockConfiguration() { return myBlockConfiguration; }
+
+    /**
+     * @return list of Powerups in Level's initial configuration
+     */
+    protected ArrayList<Powerup> getPowerupConfiguration() { return myPowerupConfiguration; }
+
+    /**
+     * @return Random seed assigned to this Level
+     */
+    protected Random getRand() { return myRand; }
 
     /**
      * @return list of Blocks in this level
      */
-    protected ArrayList<Block> getBlocks() { return myBlockConfiguration; }
+    protected ArrayList<Block> getBlocks() { return myBlocks; }
 
     /**
      * @return list of Powerups in this level
      */
-    protected ArrayList<Powerup> getPowerups() { return myPowerupConfiguration; }
+    protected ArrayList<Powerup> getPowerups() { return myPowerups; }
 
     /**
-     * Call to initializeAndGetBlocks scene or restart after lost life.
-     * @return list of one Ball
+     * @return list of Balls in this level
      */
-    protected ArrayList<Ball> resetAndGetBalls() {
-        ArrayList<Ball> list = new ArrayList<>();
-        Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
-        list.add(ball);
-        addGameObjectToRoot(ball);
-        return list;
+    protected ArrayList<Ball> getBalls() { return myBalls; }
+
+    /**
+     * @return list of Lasers in this level
+     */
+    protected ArrayList<Laser> getLasers() { return myLasers; }
+
+    /**
+     * @return the Paddle in this level
+     */
+    protected Paddle getPaddle() { return myPaddle; }
+
+    /**
+     * @return number of destructible blocks left in the Level
+     */
+    protected int getBlocksLeft() { return myBlocks.size() - myIndestructibleBlocks.size(); }
+
+    /**
+     * @return true if Pause status is on
+     */
+    protected boolean getPauseStatus() {
+        return myPauser.getIsPaused();
+    }
+
+    /*
+    ------------------------------------------------
+                    Setter Methods
+    ------------------------------------------------
+     */
+
+    /**
+     * Set number of lives left in Level
+     * @param lives
+     */
+    protected void setLives(int lives) {
+        myLives = lives;
+        //FIX, update StatusBar
     }
 
     /**
-     * Call to initializeAndGetBlocks scene or restart after lost life.
-     * @return Paddle
+     * Pauses the game if it was playing, resumes it if it was paused
      */
-    protected Paddle resetAndGetPaddle() {
-        Paddle paddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
-                myAssignedHeight - Paddle.HEIGHT - 2);
-        addGameObjectToRoot(paddle);
-        return paddle;
+    protected void togglePauseStatus() {
+        myPauser.setIsPaused(!myPauser.getIsPaused());
     }
-
-    /**
-     * @return Pauser for the Level's Scene
-     */
-    protected Pauser getPauser() { return myPauser; }
-
-    /**
-     * Override in subclass if Level uses indestructible blocks
-     * @return numBlocks
-     */
-    protected int getNumIndestructibleBlocks() { return 0; }
 }

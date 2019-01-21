@@ -23,6 +23,7 @@ public class Powerup extends GameObject implements Movable {
         setY(elapsedTime * VEL_Y + getY());
     }
 
+
     /**
      * @param block
      * @return true if Powerup is hidden within the Block.
