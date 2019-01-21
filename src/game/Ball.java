@@ -52,10 +52,10 @@ public class Ball extends GameObject implements Movable {
      * @param sceneHeight
      */
     public void reflectOffWall(double sceneWidth, double sceneHeight) {
-        if (this.getY() <= 0 || this.getY() + HEIGHT >= sceneWidth)
+        if (this.getY() <= 0 || this.getY() + HEIGHT >= sceneHeight)
             this.multiplyVelY(-1);
 
-        if (this.getX() <= 0 || this.getX() + WIDTH >= sceneHeight)
+        if (this.getX() <= 0 || this.getX() + WIDTH >= sceneWidth)
             this.multiplyVelX(-1);
     }
 
@@ -88,6 +88,7 @@ public class Ball extends GameObject implements Movable {
         for (Block block : blocks) {
             if (!this.hitGameObject(block))
                 continue;
+
             double multiplier = block.getMultiplier();
             boolean vertical = isVerticalCollision(block);
             this.multiplyVelX(vertical ? multiplier : -1 * multiplier);

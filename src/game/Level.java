@@ -3,7 +3,9 @@ package game;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Random;
 
 /**
@@ -122,10 +124,10 @@ public abstract class Level extends GameScene {
 
         catchPowerups();
         reflectBallsOffObstacles();
-        deleteBlocksHitByBalls();
-        deleteBlocksHitByLasers();
-        deleteLasers();
-        deleteBallsOutOfBounds();
+        ArrayList<Block> blocksHit = getBlocksHit(); //Can't delete blocks until after reflecting balls and deleting lasers
+        deleteLasers(); //can't delete lasers before finding blocks to delete
+        updateBlocksAndPowerups(blocksHit);
+        deleteBallsOutOfBounds();           //can't delete balls until after finding blocks to delete
         if (getBlocksLeft() == 0)
             setLives(myLives - 1);
     }
@@ -189,23 +191,25 @@ public abstract class Level extends GameScene {
         }
     }
 
-    private void deleteBlocksHitByBalls() {
-        for (Ball ball : myBalls) {
-            Block blockHit = ball.getBlockHit(myBlocks);
-            updateBlockAndPowerup(blockHit);
-        }
-    }
-    private void deleteBlocksHitByLasers() {
+    private ArrayList<Block> getBlocksHit() {
+        HashSet<Block> blocksHit = new HashSet<>();
         for (Laser laser : myLasers) {
             Block blockHit = laser.getBlockHit(myBlocks);
-            updateBlockAndPowerup(blockHit);
+            if (blockHit != null)
+                blocksHit.add(blockHit);
         }
+        for (Ball ball : myBalls) {
+            Block blockHit = ball.getBlockHit(myBlocks);
+            if (blockHit != null)
+                blocksHit.add(blockHit);
+        }
+        return new ArrayList<>(blocksHit);
     }
 
-    private void updateBlockAndPowerup(Block blockHit) {
-        if (blockHit != null) {
-            releasePowerup(blockHit);
-            safeDeleteBlock(blockHit);
+    private void updateBlocksAndPowerups(ArrayList<Block> blocksHit) {
+        for (Block block : blocksHit) {
+            releasePowerup(block);
+            safeDeleteBlock(block);
         }
     }
 
@@ -229,8 +233,7 @@ public abstract class Level extends GameScene {
     private void deleteLasers() {
         ArrayList<Laser> destroyedLasers = new ArrayList<>();
         for (Laser laser : myLasers) {
-            Block blockHit = laser.getBlockHit(myBlocks);
-            if (blockHit != null) {
+            if (laser.getBlockHit(myBlocks) != null) {
                 destroyedLasers.add(laser);
                 this.removeGameObjectFromRoot(laser);
             }
