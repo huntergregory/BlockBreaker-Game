@@ -25,7 +25,7 @@ public enum PowerupType {
     /**
      * @return text associated with the type
      */
-    public String getText() { return myText; }
+    public String getString() { return myText; }
 
     /**
      * @return name of image corresponding to Powerup

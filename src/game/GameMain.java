@@ -80,7 +80,7 @@ public class GameMain extends Application {
                 getCurrentLevel().resetLevel();
                 getCurrentLevel().getStatusBar().setLevelNumber(myNumScene - 1);
                 getCurrentLevel().getStatusBar().setScore(myScore);
-                getCurrentLevel().setLives(myLives); //sets the status bar lives too
+                getCurrentLevel().setLives(myLives);
                 myLevelHandler = new LevelHandler(getCurrentLevel());
             }
             else {

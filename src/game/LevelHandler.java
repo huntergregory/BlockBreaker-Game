@@ -6,7 +6,6 @@ import javafx.scene.input.KeyCode;
 public class LevelHandler {
 
     private Level myLevel;
-    private Paddle myPaddle; //made instance variable because used a lot
     private boolean myShouldSkipToNextLevel;
     private boolean myShouldSkipToPreviousLevel;
 
@@ -16,7 +15,6 @@ public class LevelHandler {
      */
     public LevelHandler(Level level) {
         myLevel = level;
-        myPaddle = myLevel.getPaddle();
         myShouldSkipToNextLevel = false;
         myShouldSkipToPreviousLevel = false;
         addEventListeners();
@@ -44,31 +42,33 @@ public class LevelHandler {
     }
 
     private void handleAimer(KeyCode code) {
-        if (!myPaddle.getAimer().getIsCurrentlyAiming())
+        if (!myLevel.getPaddle().getAimer().getIsCurrentlyAiming())
             return;
         if (code == KeyCode.RIGHT) {
-            myPaddle.getAimer().rotateClockwise();
+            myLevel.getPaddle().getAimer().rotateClockwise();
         }
         if (code == KeyCode.LEFT) {
-            myPaddle.getAimer().rotateCounterClockwise();
+            myLevel.getPaddle().getAimer().rotateCounterClockwise();
         }
         if (code == KeyCode.SPACE) {
-            myPaddle.getAimer().fire();
+            myLevel.getPaddle().getAimer().fire();
         }
     }
 
     private void handleMovement(KeyCode code) {
-        boolean isAiming = myPaddle.getAimer().getIsCurrentlyAiming();
-        if (code == KeyCode.RIGHT && !isAiming && myPaddle.getX() + myPaddle.getWidth() < myLevel.getAssignedWidth())
-            myPaddle.setX(myPaddle.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
-        if (code == KeyCode.LEFT && !isAiming && myPaddle.getX() > 0)
-            myPaddle.setX(myPaddle.getX() - Paddle.SPEED); //same as above
+        Paddle paddle = myLevel.getPaddle();
+        boolean isAiming = paddle.getAimer().getIsCurrentlyAiming();
+        if (code == KeyCode.RIGHT && !isAiming && paddle.getX() + paddle.getWidth() < myLevel.getAssignedWidth())
+            paddle.setX(paddle.getX() + Paddle.SPEED); //currently overshoots boundary a little due to large SPEED
+        if (code == KeyCode.LEFT && !isAiming && paddle.getX() > 0)
+            paddle.setX(paddle.getX() - Paddle.SPEED); //same as above
     }
 
     private void handleAddingLaser(KeyCode code) {
+        Paddle paddle = myLevel.getPaddle();
         if (code == KeyCode.SPACE) {
-            if (myPaddle.getCanShootLasers()) {
-                Laser laser = new Laser(myPaddle.getX() + myPaddle.getWidth() / 2, myPaddle.getY());
+            if (paddle.getCanShootLasers()) {
+                Laser laser = new Laser(paddle.getX() + paddle.getWidth() / 2, paddle.getY());
                 myLevel.getLasers().add(laser);
                 myLevel.addGameObjectToRoot(laser);
             }
@@ -76,21 +76,26 @@ public class LevelHandler {
     }
 
     private void handleCheatCodes(KeyCode code) {
+        Paddle paddle = myLevel.getPaddle();
         if (code == KeyCode.S) {
             myLevel.splitBalls();
             myLevel.getStatusBar().setPowerupType(PowerupType.SPLIT);
+            System.out.println("setting type from handler");
         }
         if (code == KeyCode.B) {
-            myPaddle.makeBig();
+            paddle.makeBig();
             myLevel.getStatusBar().setPowerupType(PowerupType.BIG_PADDLE);
+            System.out.println("setting type from handler");
         }
         if (code == KeyCode.L) {
-            myPaddle.setCanShootLasers(true);
+            paddle.setCanShootLasers(true);
             myLevel.getStatusBar().setPowerupType(PowerupType.LASER);
+            System.out.println("setting type from handler");
         }
         if (code == KeyCode.P) {
-            myPaddle.initPowerShot();
+            paddle.initPowerShot();
             myLevel.getStatusBar().setPowerupType(PowerupType.POWER_SHOT);
+            System.out.println("setting type from handler");
         }
         if (code == KeyCode.F) {
             multiplyAllBalls(1.25); // 25% faster

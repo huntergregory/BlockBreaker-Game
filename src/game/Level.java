@@ -3,7 +3,6 @@ package game;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
@@ -58,10 +57,10 @@ public abstract class Level extends GameScene {
         myFallingPowerups = new ArrayList<>();
         myBalls = new ArrayList<>();
         myLasers = new ArrayList<>();
-        myPaddle = null;
         myPauser = new Pauser(myAssignedWidth, myAssignedHeight, myRoot);
         myLives = 0;
         myBar = null;
+        myPaddle = new Paddle(0,0); //initiate this to prevent a null pointer exception in resetPaddleAndBalls
     }
 
      /*
@@ -92,6 +91,7 @@ public abstract class Level extends GameScene {
      * Call at the beginning of a new Level or when restarting after losing a life.
      */
     protected void resetPaddleAndBalls() {
+        removeGameObjectFromRoot(myPaddle);
         myBalls = new ArrayList<>();
         Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
         myBalls.add(ball);
@@ -113,6 +113,7 @@ public abstract class Level extends GameScene {
      * @param elapsedTime
      */
     protected void step(double elapsedTime) {
+        myBar.updateText();
         if (myLives == 0)
             return;
 
@@ -133,8 +134,11 @@ public abstract class Level extends GameScene {
             myBar.increaseScore();
         updateBlocksAndPowerups(blocksHit);
         deleteBallsOutOfBounds();           //can't delete balls until after finding blocks to delete
-        if (getBlocksLeft() == 0)
+        if (myBalls.size() == 0) {
+            resetPaddleAndBalls();
             setLives(myLives - 1);
+        }
+            //if (getBlocksLeft() == 0)
     }
 
 
@@ -165,6 +169,7 @@ public abstract class Level extends GameScene {
                 }
             }
             myBar.setPowerupType(powerup.getType());
+            System.out.println("setting type from level");
         }
         myFallingPowerups.removeAll(caughtPowerups);
         myPowerups.removeAll(caughtPowerups);
@@ -340,6 +345,7 @@ public abstract class Level extends GameScene {
     protected void setLives(int lives) {
         myLives = lives;
         myBar.setLives(myLives);
+        myBar.updateText();
     }
 
     /**
