@@ -27,9 +27,8 @@ public class GameMain extends Application {
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final int MAX_LIVES = 3;
-    private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
 
-    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
+    public static final GameScene[] GAME_SCENES = { new CustomizationGameScene(SIZE_WIDTH, SIZE_HEIGHT),
                                                     new SplashGameScene(SIZE_WIDTH, SIZE_HEIGHT),
                                                     new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
                                                     new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
@@ -42,6 +41,10 @@ public class GameMain extends Application {
     private int myNumScene;
     private int myLives;
     private int myScore;
+    private Paint myBackgroundColor; //ran out of time to implement these
+    private String ballImageName;    //same as above. Would make a method that extracts them from CustomizationGameScene
+                                        //and then passes these to every Level in getCurrentLevel().resetLevel();
+                                            //i.e. new method signature resetLevel(String ballImageName, Paint sceneBackgroundColor)
     private LevelHandler myLevelHandler;
 
     /**
@@ -105,11 +108,16 @@ public class GameMain extends Application {
 
     private void step (double elapsedTime) {
         if (myNumScene == SPLASH_SCENE) {
-            SplashGameScene splash = (SplashGameScene) GAME_SCENES[SPLASH_SCENE];
+            SplashGameScene splash = (SplashGameScene) getCurrentGameScene();
             if (splash.getShouldGoToLevels())
                 switchToScene(myNumScene + 1);
             else if (splash.getShouldGoToCustom())
                 switchToScene(CUSTOM_SCENE);
+        }
+        if (myNumScene == CUSTOM_SCENE) {
+            CustomizationGameScene custom = (CustomizationGameScene) getCurrentGameScene();
+            if (custom.getShouldGoToSplash())
+                switchToScene(myNumScene + 1);
         }
         if (currentGameSceneIsLevel()) {
             if (myLevelHandler.getShouldSkipToPrevious() && myNumScene > SPLASH_SCENE + 1)
