@@ -29,7 +29,11 @@ public class GameMain extends Application {
     public static final int MAX_LIVES = 3;
     private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
 
-    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT)  };
+    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
+                                                    new SplashGameScene(SIZE_WIDTH, SIZE_HEIGHT),
+                                                    new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
+                                                    new LevelOne(SIZE_WIDTH, SIZE_HEIGHT),
+                                                    new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) };
     public static final int SPLASH_SCENE = 1;
     public static final int CUSTOM_SCENE = 0;
 
@@ -88,6 +92,7 @@ public class GameMain extends Application {
                 //FIX, addEventListeners();
             }
         }
+        myStage.setScene(getCurrentGameScene().getScene());
     }
 
     private void attachGameLoopAndPlay() {
@@ -99,6 +104,13 @@ public class GameMain extends Application {
     }
 
     private void step (double elapsedTime) {
+        if (myNumScene == SPLASH_SCENE) {
+            SplashGameScene splash = (SplashGameScene) GAME_SCENES[SPLASH_SCENE];
+            if (splash.getShouldGoToLevels())
+                switchToScene(myNumScene + 1);
+            else if (splash.getShouldGoToCustom())
+                switchToScene(CUSTOM_SCENE);
+        }
         if (currentGameSceneIsLevel()) {
             if (myLevelHandler.getShouldSkipToPrevious() && myNumScene > SPLASH_SCENE + 1)
                 switchToScene(myNumScene - 1);
@@ -111,9 +123,6 @@ public class GameMain extends Application {
                 else
                     getCurrentLevel().step(elapsedTime);
             }
-        }
-        else {
-            return; //FIX
         }
     }
 

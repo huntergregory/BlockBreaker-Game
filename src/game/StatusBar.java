@@ -17,7 +17,7 @@ public class StatusBar {
     public static final int HEIGHT = 40;
     public static final Paint BAR_COLOR = Color.BLACK;
     public static final Paint TEXT_COLOR = Color.WHITE;
-    public static final int FONT_SIZE = 15;
+    public static final int FONT_SIZE = 10;
     public static final int BLOCK_POINTS = 50;
     public static final int LEVEL_TEXT = 0;
     public static final int SCORES_TEXT = 1;
