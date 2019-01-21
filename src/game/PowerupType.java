@@ -7,18 +7,25 @@ import java.util.Random;
  * @author Hunter Gregory
  */
 public enum PowerupType {
-    LASER(0, "laserpower.gif"),
-    SPLIT(1, "sizepower.gif"),
-    BIG_PADDLE(2, "extraballpower.gif"),
-    POWER_SHOT(3, "pointspower.gif"); //renamed to power shot (not supercharge) to align with "p" on gif
+    LASER(0, "Laser!", "laserpower.gif"),
+    SPLIT(1, "Split!", "sizepower.gif"),
+    BIG_PADDLE(2, "BIG Paddle!", "extraballpower.gif"),
+    POWER_SHOT(3, "Power Shot!", "pointspower.gif"); //renamed to power shot (not supercharge) to align with "p" on gif
 
     private int myId;
+    private String myText;
     private String myImageName;
 
-    PowerupType(int id, String name) {
+    PowerupType(int id, String text, String name) {
         myId = id;
+        myText = text;
         myImageName = name;
     }
+
+    /**
+     * @return text associated with the type
+     */
+    public String getText() { return myText; }
 
     /**
      * @return name of image corresponding to Powerup

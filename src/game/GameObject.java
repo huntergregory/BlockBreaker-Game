@@ -40,7 +40,7 @@ public abstract class GameObject {
         int buffer = 5; //in case an object temporarily overshoots the boundaries
         return this.getX() <= -buffer
                 || this.getX() + this.getWidth() >= sceneWidth + buffer
-                || this.getY() <= -buffer
+                || this.getY() <= StatusBar.HEIGHT - buffer
                 || this.getY() + this.getHeight() >+ sceneHeight + buffer;
     }
 

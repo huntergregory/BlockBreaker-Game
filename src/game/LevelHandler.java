@@ -6,7 +6,10 @@ import javafx.scene.input.KeyCode;
 public class LevelHandler {
 
     private Level myLevel;
-    private Paddle myPaddle;
+    private Paddle myPaddle; //made instance variable because used a lot
+    private boolean myShouldSkipToNextLevel;
+    private boolean myShouldSkipToPreviousLevel;
+
 
     /**
      * Create a handler for specified Level
@@ -14,7 +17,9 @@ public class LevelHandler {
     public LevelHandler(Level level) {
         myLevel = level;
         myPaddle = myLevel.getPaddle();
-        this.addEventListeners();
+        myShouldSkipToNextLevel = false;
+        myShouldSkipToPreviousLevel = false;
+        addEventListeners();
     }
 
     private void addEventListeners() {
@@ -71,13 +76,53 @@ public class LevelHandler {
     }
 
     private void handleCheatCodes(KeyCode code) {
-        if (code == KeyCode.S)
+        if (code == KeyCode.S) {
             myLevel.splitBalls();
-        if (code == KeyCode.B)
+            myLevel.getStatusBar().setPowerupType(PowerupType.SPLIT);
+        }
+        if (code == KeyCode.B) {
             myPaddle.makeBig();
-        if (code == KeyCode.L)
+            myLevel.getStatusBar().setPowerupType(PowerupType.BIG_PADDLE);
+        }
+        if (code == KeyCode.L) {
             myPaddle.setCanShootLasers(true);
-        if (code == KeyCode.P)
+            myLevel.getStatusBar().setPowerupType(PowerupType.LASER);
+        }
+        if (code == KeyCode.P) {
             myPaddle.initPowerShot();
+            myLevel.getStatusBar().setPowerupType(PowerupType.POWER_SHOT);
+        }
+        if (code == KeyCode.F) {
+            multiplyAllBalls(1.25); // 25% faster
+        }
+        if (code == KeyCode.D) {
+            multiplyAllBalls(0.75); // 25% slower
+        }
+        if (code == KeyCode.R) {
+            myLevel.setLives(myLevel.getLives() + 1);
+        }
+        if (code == KeyCode.Z) {
+            myShouldSkipToPreviousLevel = true;
+        }
+        if (code == KeyCode.X) {
+            myShouldSkipToNextLevel = true;
+        }
     }
+
+    private void multiplyAllBalls(double multiplier) {
+        for (Ball ball : myLevel.getBalls()) {
+            ball.multiplyVelX(multiplier);
+            ball.multiplyVelY(multiplier);
+        }
+    }
+
+    /**
+     * @return true if GameMain should go back to prior Level
+     */
+    public boolean getShouldSkipToPrevious() { return myShouldSkipToPreviousLevel; }
+
+    /**
+     * @return true if GameMain should go ahead to the next Level
+     */
+    public boolean getShouldSkipToNext() { return myShouldSkipToNextLevel; }
 }

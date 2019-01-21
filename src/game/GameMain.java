@@ -3,14 +3,10 @@ package game;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.util.ArrayList;
 
 /**
  A variant of the classic game Breakout, inspired by the original and its
@@ -33,7 +29,7 @@ public class GameMain extends Application {
     public static final int MAX_LIVES = 3;
     private Paint myBackgroundColor = Color.TOMATO; //AQUA //WHITE
 
-    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT)  };
+    public static final GameScene[] GAME_SCENES = { new LevelOne(SIZE_WIDTH, SIZE_HEIGHT) , new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT), new LevelOne(SIZE_WIDTH, SIZE_HEIGHT)  };
     public static final int SPLASH_SCENE = 1;
     public static final int CUSTOM_SCENE = 0;
 
@@ -41,6 +37,7 @@ public class GameMain extends Application {
     private Stage myStage;
     private int myNumScene;
     private int myLives;
+    private int myScore;
     private LevelHandler myLevelHandler;
 
     /**
@@ -51,6 +48,7 @@ public class GameMain extends Application {
     public void start (Stage stage) {
         myStage = stage;
         myLives = MAX_LIVES;
+        myScore = 0;
         myLevelHandler = null;
         switchToScene(SPLASH_SCENE);
 
@@ -80,7 +78,9 @@ public class GameMain extends Application {
             myNumScene = numScene;
             if (currentGameSceneIsLevel()) {
                 getCurrentLevel().resetLevel();
-                getCurrentLevel().setLives(myLives);
+                getCurrentLevel().getStatusBar().setLevelNumber(myNumScene - 1);
+                getCurrentLevel().getStatusBar().setScore(myScore);
+                getCurrentLevel().setLives(myLives); //sets the status bar lives too
                 myLevelHandler = new LevelHandler(getCurrentLevel());
             }
             else {
@@ -98,10 +98,11 @@ public class GameMain extends Application {
         animation.play();
     }
 
-    //FIX, REFACTOR, REDUCE SIMILARITY
     private void step (double elapsedTime) {
-        if (currentGameSceneIsLevel())
-            if (getCurrentLevel().getBlocksLeft() == 0)
+        if (currentGameSceneIsLevel()) {
+            if (myLevelHandler.getShouldSkipToPrevious() && myNumScene > SPLASH_SCENE + 1)
+                switchToScene(myNumScene - 1);
+            if (getCurrentLevel().getBlocksLeft() == 0 || myLevelHandler.getShouldSkipToNext())
                 switchToScene(myNumScene + 1);
             else {
                 myLives = getCurrentLevel().getLives();
@@ -110,6 +111,7 @@ public class GameMain extends Application {
                 else
                     getCurrentLevel().step(elapsedTime);
             }
+        }
         else {
             return; //FIX
         }

@@ -19,8 +19,8 @@ import java.util.Random;
  */
 public class LevelOne extends Level {
     private final int DISTANCE_FROM_SIDES = 1;  // in Block.WIDTH units
-    private final int DISTANCE_FROM_TOP = 3;    // in Block.HEIGHT units
-    private final int DISTANCE_FROM_BOTTOM = 15; // in Block.HEIGHT units
+    private final int DISTANCE_FROM_TOP = 5;    // in Block.HEIGHT units
+    private final int DISTANCE_FROM_BOTTOM = 12; // in Block.HEIGHT units
 
     private int myNumRows = 0;
     private int myNumCols = 0;
@@ -42,19 +42,15 @@ public class LevelOne extends Level {
         updateBlockConfiguration(xStart, yStart);
     }
 
-    //based on the equation:
-    // c * Block.WIDTH + (c-1) * SEPARATION_DISTANCE <= myAssignedWidth - (2 * DISTANCE_FROM_SIDES) * Block.WIDTH
     private int getNumColumns() {
-        double numCols = (myAssignedWidth - (DISTANCE_FROM_SIDES * 2) * Block.WIDTH + SEPARATION_DISTANCE) /
-                (Block.WIDTH + SEPARATION_DISTANCE);
+        double numCols = (myAssignedWidth - (DISTANCE_FROM_SIDES * 2) * Block.WIDTH + SEPARATION_DISTANCE)
+                / (Block.WIDTH + SEPARATION_DISTANCE);
         return (int) Math.floor(numCols);
     }
 
-    //based on the equation:
-    // r * Block.Height + (r-1) * SEPARATION_DISTANCE <= myAssignedHeight - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.Height
     private int getNumRows() {
-        double numRows = (myAssignedWidth - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT + SEPARATION_DISTANCE) /
-        (Block.HEIGHT + SEPARATION_DISTANCE);
+        double numRows = (myAssignedHeight - StatusBar.HEIGHT - (DISTANCE_FROM_TOP + DISTANCE_FROM_BOTTOM) * Block.HEIGHT + SEPARATION_DISTANCE)
+                            / (Block.HEIGHT + SEPARATION_DISTANCE);
         return (int) Math.floor(numRows);
     }
 

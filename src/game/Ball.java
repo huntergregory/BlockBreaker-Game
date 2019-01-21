@@ -52,7 +52,7 @@ public class Ball extends GameObject implements Movable {
      * @param sceneHeight
      */
     public void reflectOffWall(double sceneWidth, double sceneHeight) {
-        if (this.getY() <= 0 || this.getY() + HEIGHT >= sceneHeight)
+        if (this.getY() <= StatusBar.HEIGHT || this.getY() + HEIGHT >= sceneHeight)
             this.multiplyVelY(-1);
 
         if (this.getX() <= 0 || this.getX() + WIDTH >= sceneWidth)
@@ -104,11 +104,19 @@ public class Ball extends GameObject implements Movable {
         return block.getX() < centerX && centerX < block.getX() + block.getWidth();
     }
 
-    private void multiplyVelX(double multiplier) {
+    /**
+     * Multiply x component of velocity by specified amount
+     * @param multiplier
+     */
+    public void multiplyVelX(double multiplier) {
         myVelX = assertExtrema(multiplier, myVelX);
     }
 
-    private void multiplyVelY(double multiplier) {
+    /**
+     * Multiply y component of velocity by specified amount
+     * @param multiplier
+     */
+    public void multiplyVelY(double multiplier) {
         myVelY = assertExtrema(multiplier, myVelY);
     }
 

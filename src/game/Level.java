@@ -28,7 +28,7 @@ public abstract class Level extends GameScene {
     private Random myRand;
     private Pauser myPauser;
     private int myLives;
-    //private StatusDisplay myDisplay; //FIX
+    private StatusBar myBar;
 
 
     /**
@@ -61,6 +61,7 @@ public abstract class Level extends GameScene {
         myPaddle = null;
         myPauser = new Pauser(myAssignedWidth, myAssignedHeight, myRoot);
         myLives = 0;
+        myBar = null;
     }
 
      /*
@@ -68,12 +69,14 @@ public abstract class Level extends GameScene {
                     Reset Methods
     ------------------------------------------------
      */
+
     /**
      * Equivalent to calling resetBlocksAndPowerups() and then resetPaddleAndBalls()
      */
     protected void resetLevel() {
         resetBlocksAndPowerups();
         resetPaddleAndBalls();
+        myBar = new StatusBar(this.getRoot(), this.getAssignedWidth());
     }
 
     /**
@@ -113,7 +116,7 @@ public abstract class Level extends GameScene {
         if (myLives == 0)
             return;
 
-        for (Powerup powerup : myPowerups)
+        for (Powerup powerup : myFallingPowerups)
             powerup.updatePosition(elapsedTime);
 
         for (Laser laser : myLasers)
@@ -126,6 +129,8 @@ public abstract class Level extends GameScene {
         reflectBallsOffObstacles();
         ArrayList<Block> blocksHit = getBlocksHit(); //Can't delete blocks until after reflecting balls and deleting lasers
         deleteLasers(); //can't delete lasers before finding blocks to delete
+        for (int k=0; k<blocksHit.size(); k++)
+            myBar.increaseScore();
         updateBlocksAndPowerups(blocksHit);
         deleteBallsOutOfBounds();           //can't delete balls until after finding blocks to delete
         if (getBlocksLeft() == 0)
@@ -159,6 +164,7 @@ public abstract class Level extends GameScene {
                     break; //FIX
                 }
             }
+            myBar.setPowerupType(powerup.getType());
         }
         myFallingPowerups.removeAll(caughtPowerups);
         myPowerups.removeAll(caughtPowerups);
@@ -203,6 +209,7 @@ public abstract class Level extends GameScene {
             if (blockHit != null)
                 blocksHit.add(blockHit);
         }
+        blocksHit.removeAll(myIndestructibleBlocks); //FIX if hit by PowerShot
         return new ArrayList<>(blocksHit);
     }
 
@@ -315,6 +322,11 @@ public abstract class Level extends GameScene {
         return myPauser.getIsPaused();
     }
 
+    /**
+     * @return StatusBar displayed for this level
+     */
+    protected StatusBar getStatusBar() { return myBar; }
+
     /*
     ------------------------------------------------
                     Setter Methods
@@ -327,7 +339,7 @@ public abstract class Level extends GameScene {
      */
     protected void setLives(int lives) {
         myLives = lives;
-        //FIX, update StatusBar
+        myBar.setLives(myLives);
     }
 
     /**
