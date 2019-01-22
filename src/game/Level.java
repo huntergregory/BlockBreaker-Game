@@ -81,7 +81,7 @@ public abstract class Level extends GameScene {
             }
         };
         myMouseEventType = MouseEvent.MOUSE_CLICKED;
-        myKeyEventType = KeyEvent.ANY;
+        myKeyEventType = KeyEvent.KEY_TYPED;
     }
 
      /*
@@ -94,9 +94,10 @@ public abstract class Level extends GameScene {
      * Equivalent to calling resetBlocksAndPowerups() and then resetPaddleAndBalls()
      */
     protected void resetLevel() {
+        myBar = new StatusBar(this.getRoot(), this.getAssignedWidth());
         resetBlocksAndPowerups();
         resetPaddleAndBalls();
-        myBar = new StatusBar(this.getRoot(), this.getAssignedWidth());
+        displayMessage("Ready??");
     }
 
     /**
@@ -295,8 +296,8 @@ public abstract class Level extends GameScene {
     }
 
     private void displayMessage(String message) {
-        myMessageText = new Text(0, 9 * myAssignedHeight/10, message);
-        myMessageText.setFont(new Font(50));
+        myMessageText = new Text(10, 9 * myAssignedHeight/10, message);
+        myMessageText.setFont(new Font(40));
         getRoot().getChildren().add(myMessageText);
         pauseUntilInput();
     }
