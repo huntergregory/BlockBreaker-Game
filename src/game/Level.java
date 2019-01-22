@@ -30,7 +30,7 @@ public abstract class Level extends GameScene {
     private ArrayList<Powerup> myFallingPowerups;
     private ArrayList<Ball> myBalls;
     private ArrayList<Laser> myLasers;
-    private Paddle myPaddle;
+    private ArrayList<Paddle> myPaddles;
     private Random myRand;
     private Pauser myPauser;
     private int myLives;
@@ -71,7 +71,7 @@ public abstract class Level extends GameScene {
         myPauser = new Pauser(myAssignedWidth, myAssignedHeight, myRoot);
         myLives = 0;
         myBar = null;
-        myPaddle = new Paddle(0,0); //initiate this to prevent a null pointer exception in resetPaddleAndBalls
+        myPaddles = new ArrayList<>();
         myHandler = new EventHandler() {
             @Override
             public void handle(Event event) {
@@ -91,12 +91,12 @@ public abstract class Level extends GameScene {
      */
 
     /**
-     * Equivalent to calling resetBlocksAndPowerups() and then resetPaddleAndBalls()
+     * Equivalent to calling resetBlocksAndPowerups() and then resetPaddlesAndBalls()
      */
     protected void resetLevel() {
         myBar = new StatusBar(this.getRoot(), this.getAssignedWidth());
         resetBlocksAndPowerups();
-        resetPaddleAndBalls();
+        resetPaddlesAndBalls();
         displayMessage("Ready??");
     }
 
@@ -104,16 +104,63 @@ public abstract class Level extends GameScene {
      * Resets blocks and powerups to their respective configurations.
      */
     protected void resetBlocksAndPowerups() {
-        myBlocks = myBlockConfiguration;
-        myPowerups = myPowerupConfiguration;
+        resetFallingPowerups();
+        resetPowerups();
+        resetBlocks();
+    }
+
+    private void resetFallingPowerups() {
+        myFallingPowerups = new ArrayList<>(myPowerupConfiguration);
+        for (Powerup powerup : myFallingPowerups)
+            removeGameObjectFromRoot(powerup);
+        myFallingPowerups = new ArrayList<>();
+    }
+
+    private void resetPowerups() {
+        myPowerups = new ArrayList<>(myPowerupConfiguration);
+        for (Powerup powerup : myPowerupConfiguration) {
+            removeGameObjectFromRoot(powerup);
+            addGameObjectToRoot(powerup);
+        }
+    }
+
+    private void resetBlocks() {
+        myBlocks = new ArrayList<>(myBlockConfiguration);
+        for (Block block : myBlocks) {
+            removeGameObjectFromRoot(block);
+            addGameObjectToRoot(block);
+        }
     }
 
     /**
      * Creates a new Paddle and new list of one Ball, each in their default positions.
      * Call at the beginning of a new Level or when restarting after losing a life.
      */
-    protected void resetPaddleAndBalls() {
-        removeGameObjectFromRoot(myPaddle);
+    protected void resetPaddlesAndBalls() {
+        resetPaddles();
+        resetBalls();
+    }
+
+    private void resetPaddles() {
+        for (Paddle paddle : myPaddles)
+            removeGameObjectFromRoot(paddle);
+        int verticalWidth = myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2;
+        Paddle bottomPaddle = new Paddle(verticalWidth,myAssignedHeight - Paddle.HEIGHT - 2, false);
+        Paddle topPaddle = new Paddle(verticalWidth, StatusBar.HEIGHT + 2, false);
+        int horizontalHeight = (myAssignedHeight - StatusBar.HEIGHT) / 2  - Paddle.HEIGHT / 2;
+        Paddle rightPaddle = new Paddle(myAssignedWidth - Paddle.DEFAULT_WIDTH/2 - 6, horizontalHeight, true);
+        Paddle leftPaddle = new Paddle(-Paddle.DEFAULT_WIDTH/2+ 6, horizontalHeight,true );
+        this.addGameObjectToRoot(bottomPaddle);
+        this.addGameObjectToRoot(topPaddle);
+        this.addGameObjectToRoot(rightPaddle);
+        this.addGameObjectToRoot(leftPaddle);
+        myPaddles.add(topPaddle);
+        myPaddles.add(bottomPaddle);
+        myPaddles.add(rightPaddle);
+        myPaddles.add(leftPaddle);
+    }
+
+    private void resetBalls() {
         for (Ball ball : myBalls)
             removeGameObjectFromRoot(ball);
         myBalls = new ArrayList<>();
@@ -121,10 +168,6 @@ public abstract class Level extends GameScene {
         assignRandomVelocity(ball);
         myBalls.add(ball);
         this.addGameObjectToRoot(ball);
-
-        myPaddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
-                                    myAssignedHeight - Paddle.HEIGHT - 2);
-        this.addGameObjectToRoot(myPaddle);
     }
 
     private void assignRandomVelocity(Ball ball) {
@@ -173,7 +216,7 @@ public abstract class Level extends GameScene {
                 displayMessage("Game over...");
             else {
                 displayMessage("You lost a life");
-                resetPaddleAndBalls();
+                resetPaddlesAndBalls();
             }
         }
         if (getBlocksLeft() == 0)
@@ -185,14 +228,20 @@ public abstract class Level extends GameScene {
     private void catchPowerups() {
         ArrayList<Powerup> caughtPowerups = new ArrayList<>();
         for (Powerup powerup : myFallingPowerups) {
-            if (!powerup.hitGameObject(myPaddle))
+            boolean powerupHitPaddle = false;
+            for (Paddle paddle : myPaddles) {
+                if (powerup.hitGameObject(paddle))
+                    powerupHitPaddle = true;
+            }
+            if (!powerupHitPaddle)
                 continue;
 
             caughtPowerups.add(powerup);
             this.removeGameObjectFromRoot(powerup);
             switch (powerup.getType()) {
                 case LASER: {
-                    myPaddle.setCanShootLasers(true);
+                    for (Paddle paddle : myPaddles)
+                        paddle.setCanShootLasers(true);
                     break;
                 }
                 case SPLIT: {
@@ -200,25 +249,28 @@ public abstract class Level extends GameScene {
                     break; //FIX
                 }
                 case BIG_PADDLE: {
-                    myPaddle.makeBig();
+                    for (Paddle paddle : myPaddles)
+                        paddle.makeBig();
+                    break;
                 }
                 case POWER_SHOT:{
-                    myPaddle.initPowerShot();
+                    for (Paddle paddle : myPaddles)
+                        paddle.initPowerShot();
                     break; //FIX
                 }
             }
             myBar.setPowerupType(powerup.getType());
-            System.out.println("setting type from level");
         }
         myFallingPowerups.removeAll(caughtPowerups);
         myPowerups.removeAll(caughtPowerups);
-        //set boolean to eventually set ball velocity to 0 if power_shot
         //check to see if a power up fell way past the screen <-- DELETE them
     }
 
     protected void splitBalls() {
-        if (myPaddle.getAimer().getIsCurrentlyAiming())
-            return;
+        for (Paddle paddle : myPaddles) {
+            if (paddle.getAimer().getIsCurrentlyAiming())
+                return;
+        }
         ArrayList<Ball> newBalls = new ArrayList<>();
         int[] xMult = {-1, -1, 1};
         int[] yMult = {-1, 1, -1};
@@ -234,10 +286,20 @@ public abstract class Level extends GameScene {
 
     private void reflectBallsOffObstacles() {
         for (Ball ball : myBalls) {
-            ball.reflectOffWall(this.getAssignedWidth(), this.getAssignedHeight());
-            ball.reflectOffPaddle(myPaddle);
+            //ball.reflectOffWall(this.getAssignedWidth(), this.getAssignedHeight());
+            ball.reflectOffPaddles(myPaddles);
             ball.reflectOffBlock(myBlocks);
-            myPaddle.activateIfPowerShot(this.getRoot(), ball);
+
+            boolean onePaddleDidShootPowerShot = false;
+            for (Paddle paddle : myPaddles) {
+                if (!paddle.getAimer().getPowerShotIsOn())
+                    onePaddleDidShootPowerShot = true;
+            }
+            if (onePaddleDidShootPowerShot)
+                continue;
+            for (Paddle paddle : myPaddles) {
+                paddle.activateIfPowerShot(this.getRoot(), ball);
+            }
         }
     }
 
@@ -296,7 +358,7 @@ public abstract class Level extends GameScene {
     private void deleteBallsOutOfBounds() {
         ArrayList<Ball> outOfBoundsBalls = new ArrayList<>();
         for (Ball ball : myBalls) {
-            if (ball.didHitFloor(this.getAssignedHeight())) { //Should this be current height?
+            if (ball.isOutOfBounds(this.getAssignedWidth(), this.getAssignedHeight())) {
                 this.removeGameObjectFromRoot(ball);
                 outOfBoundsBalls.add(ball);
             }
@@ -371,9 +433,9 @@ public abstract class Level extends GameScene {
     protected ArrayList<Laser> getLasers() { return myLasers; }
 
     /**
-     * @return the Paddle in this level
+     * @return the list of Paddles in this level
      */
-    protected Paddle getPaddle() { return myPaddle; }
+    protected ArrayList<Paddle> getPaddles() { return myPaddles; }
 
     /**
      * @return number of destructible blocks left in the Level
@@ -406,6 +468,7 @@ public abstract class Level extends GameScene {
         myLives = lives;
         myBar.setLives(myLives);
         myBar.updateText();
+        resetFallingPowerups();
     }
 
     /**

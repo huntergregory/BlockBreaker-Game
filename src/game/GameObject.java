@@ -38,11 +38,11 @@ public abstract class GameObject {
      * @return true if GameObject has left the boundaries of the Scene
      */
     public boolean isOutOfBounds(double sceneWidth, double sceneHeight) {
-        int buffer = 5; //in case an object temporarily overshoots the boundaries
+        int buffer = 0; //in case an object temporarily overshoots the boundaries
         return this.getX() <= -buffer
                 || this.getX() + this.getWidth() >= sceneWidth + buffer
                 || this.getY() <= StatusBar.HEIGHT - buffer
-                || this.getY() + this.getHeight() >+ sceneHeight + buffer;
+                || this.getY() + this.getHeight() >= sceneHeight + buffer;
     }
 
     /**

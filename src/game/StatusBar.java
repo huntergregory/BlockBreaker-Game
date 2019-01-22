@@ -76,24 +76,24 @@ public class StatusBar {
      * Update lives left
      * @param livesLeft
      */
-    public void setLives(int livesLeft) { myLives = livesLeft; System.out.println("Set lives to " + myLives);}
+    public void setLives(int livesLeft) { myLives = livesLeft; }
 
     /**
      * Update this bar's score
      * @param score
      */
-    public void setScore(int score) { myScore = score; System.out.println("Set score to " + myScore);}
+    public void setScore(int score) { myScore = score; }
 
     /**
      * Call when a block is hit to increase the score.
      */
-    public void increaseScore() { myScore += BLOCK_POINTS; System.out.println("Increased score to " + myScore);}
+    public void increaseScore() { myScore += BLOCK_POINTS; }
 
     /**
      * Set most recent PowerupType caught
      * @param PowerupType
      */
-    public void setPowerupType(PowerupType type) { myPowerupType = type; System.out.println("Set type to " + getPowerupString()); }
+    public void setPowerupType(PowerupType type) { myPowerupType = type;  }
 
     /**
      * @return get Score of current level

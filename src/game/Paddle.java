@@ -11,23 +11,35 @@ import java.util.ArrayList;
 public class Paddle extends GameObject {
     public static final int DEFAULT_WIDTH = 60;
     public static final int HEIGHT = 10;
-    public static final int SPEED = 20;
+    public static final int SPEED = 30;
     public static final String IMAGE_NAME = "paddle.gif";
 
     private boolean myCanShootLasers;
     private PowerAimer myAimer;
+    private boolean myIsSidePaddle;
 
     /**
      * Create a game.Paddle with an empty, rounded rectangle
      */
-    public Paddle(double x, double y) {
+    public Paddle(double x, double y, boolean isSidePaddle) {
         super(IMAGE_NAME, DEFAULT_WIDTH, HEIGHT);
         this.setX(x);
         this.setY(y);
         myCanShootLasers = false;
         myAimer = new PowerAimer();
+        myIsSidePaddle = isSidePaddle;
+        if (myIsSidePaddle)
+            getImageView().setRotate(90);
     }
 
+    /**
+     * @return true if is paddle on left or right
+     */
+    public boolean getIsSidePaddle() { return myIsSidePaddle; }
+
+    /**
+     *
+     */
     public void activateIfPowerShot(Group root, Ball ball) {
         boolean shouldActivate = this.getAimer().getPowerShotIsOn()
                 && !this.getAimer().getIsCurrentlyAiming()

@@ -1,6 +1,5 @@
 package game;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 public class Ball extends GameObject implements Movable {
     public static final int WIDTH = 15;
     public static final int HEIGHT = 15;
-    public static final int MAX_VEL = 160;
+    public static final int MAX_VEL = 120;
     public static final int MIN_VEL = 60;
     public static final String IMAGE_NAME = "ball.gif"; //FIX to make customizable
 
@@ -60,23 +59,40 @@ public class Ball extends GameObject implements Movable {
     }
 
     /**
-     * Update velocity of ball upon collision with Paddle
-     * @param paddle
+     * Update velocity of ball upon collision with any Paddle
+     * @param paddles
      */
-    public void reflectOffPaddle(Paddle paddle) {
-        if (!this.hitGameObject(paddle))
+    public void reflectOffPaddles(ArrayList<Paddle> paddles) {
+        Paddle paddleHit = null;
+        for (Paddle paddle : paddles) {
+            if (this.hitGameObject(paddle))
+                paddleHit = paddle;
+        }
+        if (paddleHit == null)
             return;
 
-        int thirdOfWidth = (int) (paddle.getWidth() / 3);
-        boolean hitLeftThird = this.getX() < paddle.getX() + thirdOfWidth;
-        boolean hitRightThird = this.getX() > paddle.getX() + 2 * thirdOfWidth;
-        double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
+        if (!paddleHit.getIsSidePaddle()) {
+            int thirdOfWidth = (int) (paddleHit.getWidth() / 3);
+            boolean hitLeftThird = this.getX() < paddleHit.getX() + thirdOfWidth;
+            boolean hitRightThird = this.getX() > paddleHit.getX() + 2 * thirdOfWidth;
+            double multiplier = (hitLeftThird || hitRightThird) ? 1.5 : 0.75;
+            this.multiplyVelY(-1 * multiplier);
 
-        this.multiplyVelY(-1 * multiplier);
+            if (hitLeftThird && myVelX > 0 || hitRightThird && myVelX <= 0)
+                multiplier *= -1;
+            this.multiplyVelX(multiplier);
+        }
+        else {
+            //int sixthOfWidth = (int) (paddleHit.getHeight() / 6);
+            //boolean hitUpperThird = this.getY() < paddleHit.getY() + sixthOfWidth;
+            //boolean hitLowerThird = this.getY() > paddleHit.getY() - sixthOfWidth;
+            double multiplier = 1; //(hitUpperThird || hitLowerThird) ? 1.5 : 0.75;
+            this.multiplyVelX(-1 * multiplier);
 
-        if (hitLeftThird && myVelX > 0 || hitRightThird && myVelX <= 0)
-            multiplier *= -1;
-        this.multiplyVelX(multiplier);
+            //if (hitUpperThird && myVelY > 0 || hitLowerThird && myVelY <= 0)
+              //  multiplier *= -1;
+            this.multiplyVelY(multiplier);
+        }
     }
 
     /**

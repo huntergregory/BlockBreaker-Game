@@ -18,8 +18,8 @@ import java.util.Random;
  * @author Hunter Gregory
  */
 public class LevelOne extends Level {
-    private final int DISTANCE_FROM_SIDES = 1;  // in Block.WIDTH units
-    private final int DISTANCE_FROM_TOP = 5;    // in Block.HEIGHT units
+    private final int DISTANCE_FROM_SIDES = 4;  // in Block.WIDTH units
+    private final int DISTANCE_FROM_TOP = 12;    // in Block.HEIGHT units
     private final int DISTANCE_FROM_BOTTOM = 12; // in Block.HEIGHT units
 
     private int myNumRows = 0;
@@ -31,7 +31,7 @@ public class LevelOne extends Level {
         super(width, height, backgroundColor, rand);
         initializeBlocks();
         initializePowerups();
-        addAllToRoot();
+        //addAllToRoot();
     }
 
     private void initializeBlocks() {

@@ -18,11 +18,23 @@ import javafx.util.Duration;
 
  @author Hunter Gregory
  */
+//////
+//
+// TO FIX:
+//  ball bouncing before hits floor on bottom
+//  side paddle reflection in general
+//  side paddles overshooting top and bottom
+//  lasers and aimers for all
+//   increase height for BIG_Paddle for side paddles
+//   reset lasers after life lost
+//  add timers to powerups in general
+//  this was never called in level for a side paddle: paddle.activateIfPowerShot
+//////
 public class GameMain extends Application {
     public static final String TITLE = "BlockBreaker";
-    public static final int SIZE_HEIGHT = 500;
-    public static final int SIZE_WIDTH = 400;
-    public static final int FRAMES_PER_SECOND = 300; // less paddle lag at this number
+    public static final int SIZE_HEIGHT = 700;
+    public static final int SIZE_WIDTH = 700;
+    public static final int FRAMES_PER_SECOND = 500; // less paddle lag at this number
     public static final int MILLISECOND_DELAY = 1000 / FRAMES_PER_SECOND;
     public static final double SECOND_DELAY = 1.0 / FRAMES_PER_SECOND;
     public static final int MAX_LIVES = 3;
