@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class Laser extends GameObject implements Movable {
     public static final int WIDTH = 3;
     public static final int HEIGHT = 12;
-    public static final int VEL_Y = -160;
+    public static final int VEL_Y = -200;
     private static final String IMAGE_NAME = "brick2.gif";
 
     /**

@@ -117,13 +117,22 @@ public abstract class Level extends GameScene {
         for (Ball ball : myBalls)
             removeGameObjectFromRoot(ball);
         myBalls = new ArrayList<>();
-        Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
+        Ball ball = new Ball(myAssignedWidth/2, 9*myAssignedHeight/10, 1, 1); // FIX magic numbers
+        assignRandomVelocity(ball);
         myBalls.add(ball);
         this.addGameObjectToRoot(ball);
 
         myPaddle = new Paddle(myAssignedWidth - myAssignedWidth / 2 - Paddle.DEFAULT_WIDTH / 2,
                                     myAssignedHeight - Paddle.HEIGHT - 2);
         this.addGameObjectToRoot(myPaddle);
+    }
+
+    private void assignRandomVelocity(Ball ball) {
+        int newVelY = -myRand.nextInt(Ball.MAX_VEL - Ball.MIN_VEL) - Ball.MIN_VEL;
+        int newVelX = myRand.nextInt(Ball.MAX_VEL - Ball.MIN_VEL) + Ball.MIN_VEL;
+        newVelX = (myRand.nextBoolean()) ? newVelX : -newVelX;
+        ball.multiplyVelX(newVelX);
+        ball.multiplyVelY(newVelY);
     }
 
     /*
