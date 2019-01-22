@@ -1,7 +1,14 @@
 package game;
 
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +35,10 @@ public abstract class Level extends GameScene {
     private Pauser myPauser;
     private int myLives;
     private StatusBar myBar;
+    private EventHandler myHandler;
+    private EventType<MouseEvent> myMouseEventType;
+    private EventType<KeyEvent> myKeyEventType;
+    private Text myMessageText;
 
 
     /**
@@ -61,6 +72,16 @@ public abstract class Level extends GameScene {
         myLives = 0;
         myBar = null;
         myPaddle = new Paddle(0,0); //initiate this to prevent a null pointer exception in resetPaddleAndBalls
+        myHandler = new EventHandler() {
+            @Override
+            public void handle(Event event) {
+                unpause();
+                if (event.getEventType().equals(MouseEvent.MOUSE_CLICKED))
+                    myPauser.setIsPaused(true);
+            }
+        };
+        myMouseEventType = MouseEvent.MOUSE_CLICKED;
+        myKeyEventType = KeyEvent.ANY;
     }
 
      /*
@@ -92,6 +113,8 @@ public abstract class Level extends GameScene {
      */
     protected void resetPaddleAndBalls() {
         removeGameObjectFromRoot(myPaddle);
+        for (Ball ball : myBalls)
+            removeGameObjectFromRoot(ball);
         myBalls = new ArrayList<>();
         Ball ball = new Ball(100, 350, 60, -65); // FIX magic numbers
         myBalls.add(ball);
@@ -135,10 +158,16 @@ public abstract class Level extends GameScene {
         updateBlocksAndPowerups(blocksHit);
         deleteBallsOutOfBounds();           //can't delete balls until after finding blocks to delete
         if (myBalls.size() == 0) {
-            resetPaddleAndBalls();
             setLives(myLives - 1);
+            if (myLives == 0)
+                displayMessage("Game over...");
+            else {
+                displayMessage("You lost a life");
+                resetPaddleAndBalls();
+            }
         }
-            //if (getBlocksLeft() == 0)
+        if (getBlocksLeft() == 0)
+            displayMessage("You beat the level!");
     }
 
 
@@ -245,7 +274,8 @@ public abstract class Level extends GameScene {
     private void deleteLasers() {
         ArrayList<Laser> destroyedLasers = new ArrayList<>();
         for (Laser laser : myLasers) {
-            if (laser.getBlockHit(myBlocks) != null) {
+            if (laser.getBlockHit(myBlocks) != null
+                    || laser.isOutOfBounds(this.getAssignedWidth(), this.getAssignedHeight())) {
                 destroyedLasers.add(laser);
                 this.removeGameObjectFromRoot(laser);
             }
@@ -262,6 +292,26 @@ public abstract class Level extends GameScene {
             }
         }
         myBalls.removeAll(outOfBoundsBalls);
+    }
+
+    private void displayMessage(String message) {
+        myMessageText = new Text(0, 9 * myAssignedHeight/10, message);
+        myMessageText.setFont(new Font(50));
+        getRoot().getChildren().add(myMessageText);
+        pauseUntilInput();
+    }
+
+    private void pauseUntilInput() {
+        myPauser.pauseWithoutSymbol();
+        myScene.addEventHandler(myMouseEventType, myHandler);
+        myScene.addEventHandler(myKeyEventType, myHandler);
+    }
+
+    private void unpause() {
+        myPauser.setIsPaused(false);
+        getRoot().getChildren().remove(myMessageText);
+        myScene.removeEventHandler(myMouseEventType, myHandler);
+        myScene.removeEventHandler(myKeyEventType, myHandler);
     }
 
     /*
@@ -323,8 +373,8 @@ public abstract class Level extends GameScene {
     /**
      * @return true if Pause status is on
      */
-    protected boolean getPauseStatus() {
-        return myPauser.getIsPaused();
+    protected Pauser getPauser() {
+        return myPauser;
     }
 
     /**

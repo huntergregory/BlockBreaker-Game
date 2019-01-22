@@ -31,6 +31,8 @@ public class LevelHandler {
     }
 
     private void handleKeyInput(KeyCode code) {
+        if (myLevel.getPauser().getIsPaused())
+            return;
         handleOfficialCodes(code);
         handleCheatCodes(code);
     }

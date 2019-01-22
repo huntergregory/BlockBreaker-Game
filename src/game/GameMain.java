@@ -3,7 +3,6 @@ package game;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -41,6 +40,7 @@ public class GameMain extends Application {
     private int myNumScene;
     private int myLives;
     private int myScore;
+    private boolean myIsPausedBetweenScene;
     private Paint myBackgroundColor; //ran out of time to implement these
     private String ballImageName;    //same as above. Would make a method that extracts them from CustomizationGameScene
                                         //and then passes these to every Level in getCurrentLevel().resetLevel();
@@ -57,6 +57,7 @@ public class GameMain extends Application {
         myLives = MAX_LIVES;
         myScore = 0;
         myLevelHandler = null;
+        myIsPausedBetweenScene = false;
         switchToScene(SPLASH_SCENE);
 
         myStage.setScene(getCurrentGameScene().getScene());
@@ -79,6 +80,8 @@ public class GameMain extends Application {
     }
 
     private void switchToScene(int numScene) {
+        if (currentGameSceneIsLevel())
+            myScore = getCurrentLevel().getStatusBar().getScore();
         if (numScene >= GAME_SCENES.length || numScene < 0)
             myNumScene = SPLASH_SCENE;
         else {
@@ -92,6 +95,7 @@ public class GameMain extends Application {
             }
             else {
                 myLevelHandler = null;
+                myScore = 0;
                 //FIX, addEventListeners();
             }
         }
@@ -108,6 +112,7 @@ public class GameMain extends Application {
 
     private void step (double elapsedTime) {
         if (myNumScene == SPLASH_SCENE) {
+            myLives = MAX_LIVES;
             SplashGameScene splash = (SplashGameScene) getCurrentGameScene();
             if (splash.getShouldGoToLevels())
                 switchToScene(myNumScene + 1);
@@ -120,23 +125,21 @@ public class GameMain extends Application {
                 switchToScene(myNumScene + 1);
         }
         if (currentGameSceneIsLevel()) {
-            if (myLevelHandler.getShouldSkipToPrevious() && myNumScene > SPLASH_SCENE + 1)
+            if (getCurrentLevel().getPauser().getIsPaused())
+                return;
+            if (myLevelHandler.getShouldSkipToPrevious() && myNumScene > SPLASH_SCENE + 1) {
                 switchToScene(myNumScene - 1);
+            }
             if (getCurrentLevel().getBlocksLeft() == 0 || myLevelHandler.getShouldSkipToNext())
                 switchToScene(myNumScene + 1);
             else {
                 myLives = getCurrentLevel().getLives();
                 if (myLives == 0)
-                    endGame();
+                    switchToScene(SPLASH_SCENE);
                 else
                     getCurrentLevel().step(elapsedTime);
             }
         }
-    }
-
-    private void endGame() {
-        //FIX, need to stop LevelHandler if GAME IS OVER
-        //FIX, add more
     }
 
     public static void main(String[] args) {

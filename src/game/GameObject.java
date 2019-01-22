@@ -34,6 +34,7 @@ public abstract class GameObject {
     }
 
     /**
+     * Don't use with Paddle
      * @return true if GameObject has left the boundaries of the Scene
      */
     public boolean isOutOfBounds(double sceneWidth, double sceneHeight) {

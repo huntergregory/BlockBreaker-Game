@@ -55,6 +55,11 @@ public class Pauser {
     }
 
     /**
+     * Call to pause the game and display a message e.g. after a level is cleared
+     */
+    public void pauseWithoutSymbol() { myIsPaused = true; }
+
+    /**
      * @return true if Pause status is on
      */
     public boolean getIsPaused() { return myIsPaused; }

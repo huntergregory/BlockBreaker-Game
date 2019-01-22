@@ -95,6 +95,11 @@ public class StatusBar {
      */
     public void setPowerupType(PowerupType type) { myPowerupType = type; System.out.println("Set type to " + getPowerupString()); }
 
+    /**
+     * @return get Score of current level
+     */
+    public int getScore() { return myScore; }
+
     private String getScoreString() {
         return "Score: " + myScore;
     }
