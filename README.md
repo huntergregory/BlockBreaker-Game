@@ -7,15 +7,14 @@ Name: Hunter Gregory
 
 ### Timeline
 
-Start Date: 1/13/19
+Start Date: 1/13/18
 
-Finish Date: 1/21/19
+Finish Date: 
 
-Hours Spent: 30
+Hours Spent: 16.5
 
 ### Resources Used
 - https://docs.oracle.com/javase/8/javafx/api/javafx/
-https://www.geeksforgeeks.org/javafx-button-with-examples/
 
 ### Running the Program
 
@@ -30,29 +29,17 @@ Key/Mouse inputs:
 - Move Paddle with left and right keys
 
 Cheat keys:
-- powerups: 
-- s - split
-- p - powershot (aimed)  (space to fire)
-- b - BIG paddle
-- l - laser  (space to fire)
-- f - fast forward to speed balls up
-- d - slow down the balls
+- k
 
 Known Bugs:
-- PowerShot powerup doesn't always show PowerAimer's rectangle
-- didn't get to implement second and third levels
-- splash looks sub par
-- custom not up to speed
+- k
 
 Extra credit:
-- customization, but I didn't even get to finish, 
-and I wanted to make paddles on all four walls, but nowhere near
-enough time
+- j
 
 
 ### Notes
-Spent a lot of time refactoring, probably more than implementing
-features.
+
 
 ### Impressions
 
