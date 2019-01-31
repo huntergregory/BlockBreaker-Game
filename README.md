@@ -1,9 +1,4 @@
-game
-====
-
-This project implements the game of Breakout.
-
-Name: Hunter Gregory
+This is a Breakout game variant that I made from scratch using JavaFX.
 
 ### Timeline
 
