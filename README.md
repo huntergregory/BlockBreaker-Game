@@ -9,9 +9,9 @@ Name: Hunter Gregory
 
 Start Date: 1/13/18
 
-Finish Date: 
+Finish Date: 1/22/18
 
-Hours Spent: 16.5
+Hours Spent: 32
 
 ### Resources Used
 - https://docs.oracle.com/javase/8/javafx/api/javafx/
@@ -27,19 +27,5 @@ Data files needed:
 Key/Mouse inputs: 
 - Click to Pause
 - Move Paddle with left and right keys
-
-Cheat keys:
-- k
-
-Known Bugs:
-- k
-
-Extra credit:
-- j
-
-
-### Notes
-
-
-### Impressions
-
+- Space to shoot laser or PowerShot
+- Press random buttons to find the cheat keys!
